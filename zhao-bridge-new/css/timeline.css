@@ -1,0 +1,449 @@
+/* 时间轴样式 - 靠左版 */
+.timeline-section {
+  position: relative;
+  padding: 40px 30px;
+  background: linear-gradient(to bottom, #29635821, #140a0fde);
+  z-index: 6;
+  overflow: hidden;
+}
+
+.timeline-title {
+  text-align: left;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffcc66;
+  margin-bottom: 30px;
+  margin-left: 10px;
+  letter-spacing: 2px;
+  position: relative;
+}
+
+.timeline-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 100px;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ffaa44, #ffcc66, #ffaa44, transparent);
+}
+
+/* 时间轴容器 - 靠左，不居中 */
+.timeline-container {
+  position: relative;
+  max-width: 800px;
+  margin: 0;
+  padding: 10px 0;
+}
+
+/* 中间轴线 - 靠左，从左边开始 */
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  left: 30px;           /* 从左边30px开始，不再居中 */
+  top: 0;
+  width: 2px;           /* 稍微加粗一点看得见 */
+  height: 100%;
+  background: linear-gradient(180deg, #ffaa44, #ffcc66, #ffaa44);
+  box-shadow: 0 0 4px rgba(255, 170, 68, 0.4);
+}
+
+/* 时间轴卡片 - 全部放在轴线右侧 */
+.timeline-item {
+  position: relative;
+  width: auto;
+  padding-left: 60px;    /* 给轴线留出空间 */
+  padding-right: 20px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.timeline-item.left,
+.timeline-item.right {
+  left: 0;
+  animation: slideFromLeft 0.5s ease-out forwards;
+}
+
+/* 圆点标记 - 在轴线上 */
+.timeline-dot {
+  position: absolute;
+  top: 50%;
+  left: 22px;           /* 对齐轴线位置 */
+  width: 8px;
+  height: 8px;
+  background: #ffaa44;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 6px #ffaa44;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+/* 移除左右不同的圆点定位 */
+.timeline-item.left .timeline-dot,
+.timeline-item.right .timeline-dot {
+  left: 22px;
+  right: auto;
+}
+
+/* 卡片内容 */
+.timeline-card {
+  background: rgba(20, 25, 40, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 170, 68, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 170, 68, 0.05), transparent);
+  pointer-events: none;
+}
+
+.timeline-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  border-color: #ffaa44;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 170, 68, 0.15);
+  background: rgba(30, 35, 55, 0.9);
+}
+
+/* 年代标签 */
+.timeline-era {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  color: #ffaa44;
+  background: rgba(255, 170, 68, 0.15);
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+/* 年代数字 */
+.timeline-year {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffdd99;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.timeline-year small {
+  font-size: 10px;
+  font-weight: 400;
+  color: #aaa;
+  margin-left: 4px;
+}
+
+/* 朝代标签 */
+.timeline-dynasty {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffcc66;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed rgba(255, 170, 68, 0.4);
+  display: inline-block;
+}
+
+/* 标题 */
+.timeline-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+/* 描述内容 */
+.timeline-desc {
+  font-size: 10px;
+  color: #ccc;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.timeline-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.tech-tag {
+  font-size: 8px;
+  padding: 2px 6px;
+  background: rgba(255, 170, 68, 0.2);
+  border-radius: 12px;
+  color: #ffcc88;
+  border: 0.5px solid rgba(255, 170, 68, 0.4);
+}
+
+/* 动画 - 从左边滑入 */
+@keyframes slideFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .timeline-section {
+    padding: 30px 15px;
+  }
+  .timeline-title {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+  .timeline-container::before {
+    left: 20px;
+  }
+  .timeline-item {
+    padding-left: 45px;
+    padding-right: 10px;
+  }
+  .timeline-dot {
+    left: 16px;
+  }
+  .timeline-year {
+    font-size: 14px;
+  }
+  .timeline-dynasty {
+    font-size: 11px;
+  }
+  .timeline-card-title {
+    font-size: 11px;
+  }
+  .timeline-desc {
+    font-size: 9px;
+  }
+}
+/* 弹幕卡片 - 添加固定宽度控制 */
+.bullet-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  margin-right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 30px;
+  color: #ffe6b3;
+  font-weight: 500;
+  white-space: nowrap;
+  border-left: 2px solid #ffaa44;
+  font-size: 11px;
+  /* 添加宽度控制 - 可选 */
+  min-width: 100px;      /* 最小宽度 */
+  max-width: 200px;      /* 最大宽度 */
+  /* 如果文字超出，允许换行 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;  /* 超出显示省略号 */
+}
+/* 弹幕卡片 - 宽度根据文字内容自动调整 */
+.bullet-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 14px;
+  margin-right: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 30px;
+  color: #ffe6b3;
+  font-weight: 500;
+  border-left: 2px solid #ffaa44;
+  font-size: 10px;
+  /* 关键：宽度由内容决定 */
+  width: auto;
+  min-width: auto;
+  max-width: none;
+  /* 文字不换行 */
+  white-space: nowrap;
+  /* 确保完整显示 */
+  overflow: visible;
+}
+
+/* 弹幕文字 */
+.bullet-item .bullet-text {
+  font-size: 10px;
+  white-space: nowrap;
+  /* 文字完整显示 */
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* 菜单按钮 */
+.bullet-menu-btn {
+  width: 10px;
+  height: 10px;
+  background: #ffaa44;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  color: #1e293b;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.bullet-item:hover .bullet-menu-btn {
+  opacity: 1;
+}
+/* ========== 弹窗样式 ========== */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(60, 60, 55, 0.85);
+        z-index: 100000;
+        display: none;
+        justify-content: center;
+        align-items: flex-start;
+        backdrop-filter: blur(4px);
+        padding-top: 5vh;
+    }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes modalIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .modal-content {
+        background: linear-gradient(145deg, #e8f0f0 0%, #dce6e6 100%);
+        border: 0.4mm solid rgba(80, 120, 120, 0.30);
+        border-radius: 2.5mm;
+        padding: 6mm;
+        max-width: 80vw;
+        max-height: 80vh;
+        overflow: auto;
+        position: relative;
+        animation: modalIn 0.4s ease;
+    }
+    .modal-close {
+        position: absolute;
+        top: 2mm;
+        right: 2mm;
+        width: 7mm;
+        height: 7mm;
+        border: none;
+        background: #5a8a8a;
+        color: #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 4.5mm;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    .modal-close:hover { background: #4a7a7a; }
+    .modal-title {
+        font-family: "Ma Shan Zheng", serif;
+        font-size: 5mm;
+        color: #3a5a5a;
+        text-align: center;
+        margin-bottom: 4mm;
+        padding-bottom: 2mm;
+        border-bottom: 0.25mm solid rgba(80, 120, 120, 0.25);
+    }
+    .modal-desc {
+        font-size: 3.2mm;
+        color: #4a5a5a;
+        line-height: 1.9;
+        text-align: justify;
+        white-space: pre-wrap;
+    }
+
+    /* ========== 时间轴卡片手风琴效果 ========== */
+    .timeline-card {
+        transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        cursor: pointer;
+        overflow: hidden;
+    }
+    
+    .timeline-card {
+        width: 56px !important;
+        min-width: 56px !important;
+        max-width: 56px !important;
+        padding: 12px 4px !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .timeline-card .timeline-era,
+    .timeline-card .timeline-year,
+    .timeline-card .timeline-dynasty,
+    .timeline-card .timeline-card-title,
+    .timeline-card .timeline-desc,
+    .timeline-card .timeline-tech {
+        opacity: 0;
+        visibility: hidden;
+        width: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        transition: opacity 0.2s ease;
+    }
+    
+    .timeline-card::after {
+        content: attr(data-short);
+        position: absolute;
+        font-size: 14px;
+        font-weight: bold;
+        color: #ffaa44;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+    }
+    
+    .timeline-card.active {
+        width: 480px !important;
+        min-width: 480px !important;
+        max-width: 480px !important;
+        padding: 12px 18px !important;
+        border-color: #ffaa44;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 170, 68, 0.2);
+        display: block;
+    }
+    
+    .timeline-card.active .timeline-era,
+    .timeline-card.active .timeline-year,
+    .timeline-card.active .timeline-dynasty,
+    .timeline-card.active .timeline-card-title,
+    .timeline-card.active .timeline-desc,
+    .timeline-card.active .timeline-tech {
+        opacity: 1;
+        visibility: visible;
+        width: auto;
+        height: auto;
+        padding: initial;
+        margin: initial;
+    }
+    
+    .timeline-card.active::after {
+        opacity: 0;
+        visibility: hidden;
+    }

@@ -1,0 +1,12 @@
+[project]
+requires = [ "nodejs-24" ]
+template = "native-static"
+version = "0.0.1"
+
+[dev]
+build = [ "echo", "Static site - no build needed" ]
+run = [ "npx", "serve", "-l", "5000", "-s", "public" ]
+
+[deploy]
+build = [ "echo", "Static site - no build needed" ]
+run = [ "npx", "serve", "-l", "5000", "-s", "public" ]

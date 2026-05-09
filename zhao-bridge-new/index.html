@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>赵州桥 | 数字遗产</title>
+  <link rel="stylesheet" href="./css/index.css">
+  <link rel="stylesheet" href="./css/timeline.css">
+  <link rel="stylesheet" href="./css/card.css">
+  <style>
+    /* ========== 新增：古桥解构区域样式（不影响原有任何样式） ========== */
+    .bridge-sketch-overlay {
+      position: fixed;
+      top: 25%;
+      left: 0;
+      right: 0;
+      bottom: -10%;
+      background: url("./images/bridge-sketch.png") center top / contain no-repeat;
+      mix-blend-mode: multiply;
+      filter: blur(0.8px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .deconstruction-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 6;
+    }
+
+    .content-section {
+      background: rgba(20, 25, 40, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 170, 68, 0.3);
+      border-radius: 24px;
+      padding: 30px 40px;
+      margin-bottom: 40px;
+      position: relative;
+      transition: all 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .section-num {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #c9a96e, #a88848);
+      color: #1a1a2e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(201, 169, 110, 0.4);
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #ffdd99;
+      letter-spacing: 2px;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(201, 169, 110, 0.5), transparent);
+    }
+
+    /* 结构详解网格 */
+    .structure-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .structure-visual {
+      background: rgba(10, 15, 26, 0.7);
+      border: 1px solid rgba(201, 169, 110, 0.3);
+      border-radius: 16px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .structure-visual:hover {
+      transform: translateY(-5px);
+      border-color: #c9a96e;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .structure-visual-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+
+    .structure-visual-text {
+      font-size: 14px;
+      color: #d4b87a;
+    }
+
+    .structure-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .structure-item {
+      background: rgba(10, 15, 26, 0.7);
+      border: 1px solid rgba(201, 169, 110, 0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .structure-item:hover {
+      transform: translateX(5px);
+      border-color: #c9a96e;
+      background: rgba(30, 35, 55, 0.9);
+    }
+
+    .structure-item-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .structure-item-icon {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #c9a96e, #a88848);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: #1a1a2e;
+    }
+
+    .structure-item-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffdd99;
+    }
+
+    .structure-item-desc {
+      font-size: 13px;
+      color: #c8c2b0;
+      line-height: 1.5;
+      padding-left: 42px;
+    }
+
+    .highlight {
+      color: #ffcc66;
+      font-weight: 600;
+    }
+
+    /* 柱状图 */
+    .tech-bar-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 280px;
+      padding: 20px 10px 0;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+    }
+
+    .bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 18%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .bar-item:hover {
+      transform: translateY(-3px);
+    }
+
+    .bar-value {
+      font-size: 14px;
+      color: #ffdd99;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .bar-fill {
+      width: 100%;
+      max-width: 50px;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 8px;
+    }
+
+    .bar-item:nth-child(1) .bar-fill { height: 200px; background: linear-gradient(180deg, #c9a96e, #a88848); }
+    .bar-item:nth-child(2) .bar-fill { height: 115px; background: linear-gradient(180deg, #d4b87a, #b89858); }
+    .bar-item:nth-child(3) .bar-fill { height: 22px; background: linear-gradient(180deg, #e0c88a, #c9a96e); }
+    .bar-item:nth-child(4) .bar-fill { height: 87px; background: linear-gradient(180deg, #d4b87a, #b89858); }
+    .bar-item:nth-child(5) .bar-fill { height: 250px; background: linear-gradient(180deg, #c9a96e, #a88848); }
+
+    .bar-number {
+      font-size: 12px;
+      font-weight: bold;
+      color: #1a1a2e;
+    }
+
+    .bar-label {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #d4b87a;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .bar-note {
+      font-size: 10px;
+      color: #8a7a6a;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* 对比表格 */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 25px;
+    }
+
+    .compare-table th {
+      background: rgba(201, 169, 110, 0.15);
+      padding: 12px 10px;
+      font-weight: 600;
+      color: #ffdd99;
+      border-bottom: 1px solid rgba(201, 169, 110, 0.3);
+    }
+
+    .compare-table td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(201, 169, 110, 0.15);
+      color: #c8c2b0;
+    }
+
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .compare-table td:first-child {
+      font-weight: 600;
+      color: #ffdd99;
+    }
+
+    /* 施工工艺流程 */
+    .process-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .process-step {
+      flex: 1;
+      min-width: 100px;
+      background: rgba(10, 15, 26, 0.7);
+      border: 1px solid rgba(201, 169, 110, 0.3);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .process-step::before {
+      content: attr(data-step);
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #c9a96e, #a88848);
+      color: #1a1a2e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .process-step:hover {
+      transform: translateY(-5px);
+      border-color: #c9a96e;
+      background: rgba(30, 35, 55, 0.9);
+    }
+
+    .process-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffdd99;
+      margin-top: 8px;
+      margin-bottom: 6px;
+    }
+
+    .process-desc {
+      font-size: 11px;
+      color: #a8987a;
+      line-height: 1.4;
+    }
+
+    .process-arrow {
+      color: rgba(201, 169, 110, 0.4);
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    /* 科学价值 */
+    .value-intro {
+      font-size: 14px;
+      color: #c8c2b0;
+      line-height: 1.8;
+      margin-bottom: 25px;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      border-left: 4px solid #c9a96e;
+    }
+
+    .value-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      margin-bottom: 25px;
+    }
+
+    .value-card {
+      background: rgba(10, 15, 26, 0.7);
+      border: 1px solid rgba(201, 169, 110, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .value-card:hover {
+      transform: translateY(-5px);
+      border-color: #c9a96e;
+      background: rgba(30, 35, 55, 0.9);
+    }
+
+    .value-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .value-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffdd99;
+      margin-bottom: 8px;
+    }
+
+    .value-desc {
+      font-size: 12px;
+      color: #a8987a;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .value-tag {
+      display: inline-block;
+      font-size: 10px;
+      color: #c9a96e;
+      background: rgba(201, 169, 110, 0.15);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* 引文区块 */
+    .quote-block {
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 4px solid #c9a96e;
+      border-radius: 0 12px 12px 0;
+      padding: 20px 25px;
+      position: relative;
+    }
+
+    .quote-block::before {
+      content: '"';
+      position: absolute;
+      top: -10px;
+      left: 15px;
+      font-size: 60px;
+      color: rgba(201, 169, 110, 0.15);
+      font-family: serif;
+    }
+
+    .quote-text {
+      font-size: 18px;
+      font-weight: 500;
+      color: #ffdd99;
+      text-align: center;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .quote-author {
+      font-size: 12px;
+      color: #a8987a;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* 动画 */
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.2), transform 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+    }
+
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+
+    @media (max-width: 900px) {
+      .structure-grid { grid-template-columns: 1fr; }
+      .value-cards { grid-template-columns: 1fr; }
+      .process-flow { flex-direction: column; }
+      .process-arrow { transform: rotate(90deg); }
+      .content-section { padding: 20px; }
+      .section-title { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 桥体线稿背景层（新增，不影响原有布局） -->
+  <div class="bridge-sketch-overlay"></div>
+
+  <!-- 导航栏 -->
+  <div class="top-navbar">
+    <div class="nav-logo">🏛️ 赵州桥 | 数字遗产</div>
+    <div class="nav-menu">
+      <div class="nav-item">总览</div>
+      <div class="nav-item">序章</div>
+      <div class="nav-item">溯源</div>
+      <div class="nav-item">工匠</div>
+      <div class="nav-item">信步</div>
+      <div class="nav-item">今朝</div>
+    </div>
+  </div>
+
+  <!-- 视差滚动区域 -->
+  <section>
+    <img src="images/stars.png" id="stars">
+    <img src="images/skyblue.jpg" id="moon">
+    <img src="images/senery-all.png" id="mountains_behind" style="width: 100%;">
+    <h2 id="text">Bridge</h2>
+    <a href="./zhao-3d/Untitled-1.html" id="btn">Explore</a>
+    <img src="images/bridge.png" id="mountains_front">
+  </section>
+
+  <div class="sec" id="sec" style="overflow: hidden;">
+    <div class="back" style="background: #a88848; border: 1px solid #f09d0e;"></div>
+    <div>
+      <h2>千年之韧</h2>
+      <p>这个网站通过三维模型拆解赵州桥与洛阳桥的结构奥秘，结合AI桥梁专家实时讲解两座古桥千年不倒的力学原理，从拱形承压到筏形基础，从牡蛎固基到柔性连接，用现代科技语言完整翻译古代工匠的直觉智慧，让访客在交互探索中真正理解中国古桥的超时代智慧。</p>
+    </div>
+    <img src="./images/2.png" alt="" style="width: 40%; transform: rotateY(180deg); position: absolute; top: 10px;right: 0;">
+  </div>
+
+  <!-- 赵州桥 · 千年时间轴 -->
+  <div class="timeline-section" style="position: relative; cursor:default;">
+    <h2 class="timeline-title">📜 赵州桥 · 千年纪事</h2>
+    <div class="timeline-container">
+      
+      <div class="timeline-item left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card" data-short="隋" data-era="创新诞生期">
+          <span class="timeline-era">创新诞生期</span>
+          <div class="timeline-year">595-605 <small>年</small></div>
+          <div class="timeline-dynasty">隋 · 大业年间</div>
+          <div class="timeline-card-title">🏗️ 李春主持建造 · 首创敞肩圆弧拱</div>
+          <div class="timeline-desc">隋代工匠李春主持建造赵州桥，首创“敞肩圆弧拱”结构，在主拱两端各设两个小拱，既减轻桥身自重，又增加泄洪面积。这是世界桥梁史上最早的敞肩拱结构，比西方早了七百余年。</div>
+          <div class="timeline-tech">
+            <span class="tech-tag">敞肩拱</span><span class="tech-tag">圆弧券</span><span class="tech-tag">李春</span><span class="tech-tag">大业年间</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card" data-short="唐" data-era="文化确立期">
+          <span class="timeline-era">文化确立期</span>
+          <div class="timeline-year">725 <small>年</small></div>
+          <div class="timeline-dynasty">唐 · 开元年间</div>
+          <div class="timeline-card-title">📝 张嘉贞撰写铭文 · 天下第一桥</div>
+          <div class="timeline-desc">唐代中书令张嘉贞为赵州桥撰写《石桥铭序》，“赵郡洨河石桥，隋匠李春之迹也”，这是历史上首次明确记载赵州桥的建造者与年代。铭文中赞誉其为“天下第一桥”，奠定了赵州桥的文化地位。</div>
+          <div class="timeline-tech">
+            <span class="tech-tag">张嘉贞铭文</span><span class="tech-tag">天下第一桥</span><span class="tech-tag">补石重砌</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card" data-short="宋" data-era="技术完善期">
+          <span class="timeline-era">技术完善期</span>
+          <div class="timeline-year">1066 <small>年</small></div>
+          <div class="timeline-dynasty">宋 · 治平年间</div>
+          <div class="timeline-card-title">🔩 首次使用腰铁技术 · 加固拱券结构</div>
+          <div class="timeline-desc">宋代对赵州桥进行了大规模修缮，首次使用腰铁和榫卯工艺加固拱券，增强了拱券之间的横向连接，为古桥千年不倒奠定了坚实基础。</div>
+          <div class="timeline-tech">
+            <span class="tech-tag">腰铁技术</span><span class="tech-tag">榫卯工艺</span><span class="tech-tag">治平年间</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card" data-short="宋" data-era="文化确立期">
+          <span class="timeline-era">文化确立期</span>
+          <div class="timeline-year">1086-1094 <small>年</small></div>
+          <div class="timeline-dynasty">宋 · 元祐年间</div>
+          <div class="timeline-card-title">📜 宋哲宗赐名"安济桥"</div>
+          <div class="timeline-desc">宋哲宗赵煦赐名"安济桥"，寓意"安济众生"，从此赵州桥有了官方正式名称，沿用至今。</div>
+          <div class="timeline-tech">
+            <span class="tech-tag">哲宗赐名</span><span class="tech-tag">安济桥</span><span class="tech-tag">元祐年间</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card" data-short="明" data-era="维护延续期">
+          <span class="timeline-era">维护延续期</span>
+          <div class="timeline-year">1562 <small>年</small></div>
+          <div class="timeline-dynasty">明 · 嘉靖年间</div>
+          <div class="timeline-card-title">🛠️ 密集修缮三期 · 仿雕龙兽图案</div>
+          <div class="timeline-desc">明代嘉靖年间，赵州桥经历了三次密集修缮，更换了部分栏板与望柱，雕刻了仿龙兽图案和石狮。现存桥面上的栏板雕刻多为此时期遗存，体现了明代精湛的石雕工艺。</div>
+          <div class="timeline-tech">
+            <span class="tech-tag">密集修缮</span><span class="tech-tag">仿雕龙兽</span><span class="tech-tag">石狮</span><span class="tech-tag">栏板雕刻</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card" data-short="今" data-era="科学保护期">
+          <span class="timeline-era">科学保护期</span>
+          <div class="timeline-year">1991 <small>年</small></div>
+          <div class="timeline-dynasty">现代 · 1991年</div>
+          <div class="timeline-card-title">🏛️ 国际土木工程历史古迹认定</div>
+          <div class="timeline-desc">赵州桥被美国土木工程师学会（ASCE）评选为“国际土木工程历史古迹”，与万里长城、埃菲尔铁塔、金字塔等齐名。如今采用数字化监测系统，对桥梁结构进行全天候健康监测，千年古桥进入科学保护时代。</div>
+          <div class="timeline-tech">
+            <span class="tech-tag">国际土木工程</span><span class="tech-tag">历史古迹认定</span><span class="tech-tag">数字化监测</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 文化艺术区域 -->
+    <div class="cultural-section" id="culturalSection">
+      <h1 class="cultural-title">文化艺术<br>雕刻工艺</h1>
+      <div class="container">
+        <div class="card" style="--i:-2;" data-title="蛟龙穿岩" data-desc="赵州桥两侧栏板雕刻“蛟龙穿岩”，龙身穿过岩层，呈现强烈的透视感与动态美。据研究，这些栏板雕刻属于隋代原物，是研究隋唐石雕艺术的珍贵实物资料。">🐉</div>
+        <div class="card" style="--i:-1;" data-title="桥头石狮" data-desc="赵州桥两侧的石狮雕刻形态各异，有的蹲踞，有的回首，造型生动，展现了隋唐石雕艺术的雄浑大气。">🦁</div>
+        <div class="card" style="--i:0;" data-title="望柱雕饰" data-desc="望柱是栏板的支撑构件，赵州桥的望柱头雕刻有莲瓣、石榴等多种造型，线条流畅，比例协调。">🏛️</div>
+        <div class="card" style="--i:1;" data-title="龙兽浮雕" data-desc="明代修缮时仿照原貌雕刻的龙兽图案，延续了隋唐石雕艺术的风格，同时又有所创新。">✨</div>
+        <div class="card" style="--i:2;" data-title="桥上仙迹" data-desc="赵州桥被誉为“神仙之地”，留下了众多仙人足迹。桥上有驴蹄印（张果老）、车辙印（柴王爷）、膝盖印（鲁班）等多种“仙迹”。">⭐</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 民间传说 -->
+  <div class="folklore-wrapper">
+    <div class="folklore-title">📖 民间传说</div>
+    <div class="folklore-grid">
+      <div class="folklore-card" onclick='showModal("鲁班造桥", "鲁班造桥传说\n\n传说赵州桥是鲁班所建。\n\n鲁班，姓公输，名班，春秋时期鲁国人，被后世尊为“工匠之神”。\n\n传说鲁班一夜之间建成此桥，手艺精巧，令观者惊叹。桥下八角各有一只眼睛，便于观察水势。\n\n“鲁班造桥”的说法，体现了古代工匠对鲁班的崇敬，也说明赵州桥工艺之精妙绝伦。")'>
+        <div class="folklore-card-icon">🔨</div>
+        <div class="folklore-card-title">鲁班造桥</div>
+        <div class="folklore-card-desc">一夜建成此桥，桥下八角各有一眼观察水势</div>
+      </div>
+      <div class="folklore-card" onclick='showModal("张果老骑驴试桥", "张果老骑驴试桥\n\n传说八仙之一的张果老骑驴过桥，欲试桥之坚固。\n\n张果老倒骑毛驴，日行数万里，腰间酒葫芦不离身。\n\n他牵着驮有日月星辰的驴子过桥，桥身微微晃动却安然无恙。\n\n桥面上至今留有“驴蹄印”五处，相传即为张果老所留。")'>
+        <div class="folklore-card-icon">🐎</div>
+        <div class="folklore-card-title">张果老试桥</div>
+        <div class="folklore-card-desc">倒骑毛驴驮日月星辰过桥，桥面留有驴蹄印</div>
+      </div>
+      <div class="folklore-card" onclick='showModal("柴王爷推车碾轧", "柴王爷推车碾轧\n\n传说柴荣（后周世宗，又称柴王爷）推车运粮过桥，试桥梁承载之力。\n\n柴荣曾在赵州任职，后成为一代明君，为民造福。\n\n他推着满载粮食的车子过桥，车轮碾过处留下深深的辙印。\n\n桥面南侧现存的三道沟纹，相传即为柴王爷推车碾轧所留。")'>
+        <div class="folklore-card-icon">🛒</div>
+        <div class="folklore-card-title">柴王爷推车</div>
+        <div class="folklore-card-desc">推车运粮试桥，车轮碾过留下三道沟纹</div>
+      </div>
+      <div class="folklore-card" onclick='showModal("桥上仙迹传说", "桥上仙迹\n\n赵州桥被誉为“神仙之地”，留下了众多仙人足迹。\n\n桥上有驴蹄印（张果老）、车辙印（柴王爷）、膝盖印（鲁班）等多种“仙迹”。\n\n据说每逢雨后清晨，桥下可见仙人往来其间。\n\n这些传说为古桥增添了神秘色彩，也反映了赵州桥在民间的崇高地位。")'>
+        <div class="folklore-card-icon">✨</div>
+        <div class="folklore-card-title">桥上仙迹</div>
+        <div class="folklore-card-desc">众多仙人足迹，仙人在桥下往来其间</div>
+      </div>
+    </div>
+    <div class="folklore-intro">
+      <div class="folklore-intro-text">水从碧玉环中过，人在苍龙背上行</div>
+      <div class="folklore-intro-source">—— 元代·刘百熙</div>
+    </div>
+  </div>
+
+  <!-- 入场动画矩形 -->
+  <div id="introRect" class="intro-rect"></div>
+
+  <!-- 宠物 -->
+  <div id="petWrapper" class="pet-wrapper">
+    <div id="petClickArea" style="width: 100%; height: 100%;">
+      <svg class="pet-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <style>
+            @keyframes blinkUpLeft { 0%,85%,100% { transform: translateY(0); } 90%,95% { transform: translateY(-10px); } }
+            @keyframes blinkUpRight { 0%,85%,100% { transform: translateY(0); } 90%,95% { transform: translateY(-10px); } }
+            @keyframes wagTail { 0%,100% { transform: rotate(-10deg); transform-origin: 85% 85%; } 50% { transform: rotate(15deg); transform-origin: 85% 85%; } }
+            .eyelid-left { animation: blinkUpLeft 3.5s infinite ease-in-out; }
+            .eyelid-right { animation: blinkUpRight 3.5s infinite ease-in-out; }
+            .tail-group { animation: wagTail 1.2s infinite ease-in-out; }
+          </style>
+        </defs>
+        <circle cx="50" cy="55" r="40" fill="#FF7043"/>
+        <ellipse cx="50" cy="65" rx="22" ry="18" fill="#FFAB91"/>
+        <circle cx="35" cy="50" r="6" fill="white"/>
+        <circle cx="35" cy="50" r="3" fill="#3E2723"/>
+        <circle cx="33" cy="48" r="1.5" fill="white"/>
+        <rect class="eyelid-left" x="29" y="50" width="12" height="6" rx="3" fill="#FF7043"/>
+        <circle cx="65" cy="50" r="6" fill="white"/>
+        <circle cx="65" cy="50" r="3" fill="#3E2723"/>
+        <circle cx="63" cy="48" r="1.5" fill="white"/>
+        <rect class="eyelid-right" x="59" y="50" width="12" height="6" rx="3" fill="#FF7043"/>
+        <path d="M28 28 L22 10 L36 24 Z" fill="#BF360C"/>
+        <path d="M72 28 L78 10 L64 24 Z" fill="#BF360C"/>
+        <circle cx="28" cy="60" r="5" fill="#FF3D00" opacity="0.4"/>
+        <circle cx="72" cy="60" r="5" fill="#FF3D00" opacity="0.4"/>
+        <path d="M42 70 Q50 78 58 70" stroke="#BF360C" stroke-width="3" fill="none" stroke-linecap:round"/>
+        <g class="tail-group">
+          <path d="M50 95 Q40 108 55 112 Q48 105 50 95" fill="#FF9800" stroke="#E65100" stroke-width="1.5"/>
+          <path d="M55 112 Q62 115 58 108" fill="#FF9800" stroke="#E65100" stroke-width="1.5"/>
+        </g>
+        <text x="50" y="30" text-anchor="middle" font-size="16" fill="#FFD54F" font-weight="bold">🔥</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 粒子画布 -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- AI对话框 -->
+  <div id="aiChatWindow" class="ai-chat-window">
+    <iframe id="aiChatFrame" src="./agent.html"></iframe>
+  </div>
+
+  <!-- 弹幕系统 -->
+  <div class="bullet-publish-panel" id="publishPanel">
+    <div class="panel-hint">📝</div>
+    <input type="text" id="bulletInput" placeholder="写一条弹幕..." maxlength="40">
+    <button id="publishBulletBtn">📢 发送</button>
+  </div>
+
+  <div class="bullet-stats">
+    <div>👍 <span id="likeCount">0</span> &nbsp;| 👎 <span id="dislikeCount">0</span></div>
+  </div>
+
+  <div class="bullet-screen-container">
+    <div class="bullet-track" id="bulletTrack"></div>
+  </div>
+
+  <div id="bulletMenu" class="bullet-menu" style="display: none;">
+    <span id="menuLike">👍 点赞</span>
+    <span id="menuDislike">👎 不认同</span>
+    <span id="menuCopy">📋 复制</span>
+  </div>
+
+  <!-- 翻转卡牌弹窗 -->
+  <div class="floating-card-overlay" id="floatingCardOverlay">
+    <div class="floating-card" id="floatingCard">
+      <div class="card-front">
+        <div class="card-icon-emoji" id="floatingIcon">🐉</div>
+        <div class="card-title" id="floatingTitle">蛟龙穿岩</div>
+        <div class="card-subtitle">点击翻转查看详情</div>
+      </div>
+      <div class="card-back">
+        <img class="card-back-img" id="floatingImg" src="" alt="详情图片">
+        <div class="card-back-desc">
+          <p id="floatingDesc">赵州桥两侧栏板雕刻“蛟龙穿岩”，龙身穿过岩层，呈现强烈的透视感与动态美。</p>
+        </div>
+      </div>
+    </div>
+    <div class="close-hint">✨ 点击任意空白处关闭 ✨</div>
+  </div>
+
+  <!-- 原有弹窗 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <h3 class="modal-title" id="modalTitle">标题</h3>
+      <div class="modal-desc" id="modalDesc"></div>
+    </div>
+  </div>
+
+  <!-- eyesight 容器 -->
+  <div class="eyesight">
+    <div class="eyesight-left">
+      <div class="info-card">
+        <div class="card-title">★ 基本信息 ★</div>
+        <ul class="info-list">
+          <li><span class="info-dot">◆</span><span class="info-label">全称</span><span class="info-value">赵州桥（安济桥）</span></li>
+          <li><span class="info-dot">◆</span><span class="info-label">区位</span><span class="info-value">河北省赵县洨河</span></li>
+          <li><span class="info-dot">◆</span><span class="info-label">建造</span><span class="info-value">隋代 595-605年</span></li>
+          <li><span class="info-dot">◆</span><span class="info-label">主持</span><span class="info-value">李春（将作少监）</span></li>
+          <li><span class="info-dot">◆</span><span class="info-label">历时</span><span class="info-value">约十年建成</span></li>
+          <li><span class="info-dot">◆</span><span class="info-label">地位</span><span class="info-value">世界最早敞肩石拱桥</span></li>
+          <li><span class="info-dot">◆</span><span class="info-label">荣誉</span><span class="info-value">国保单位·国际古迹</span></li>
+          <li><span class="info-dot">◆</span><span class="info-label">形制</span><span class="info-value">单孔敞肩圆弧拱桥</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="eyesight-right" id="eyesightRight">
+      <div class="expand-box" id="expandBox">
+        <div class="corner-tl"></div>
+        <div class="corner-tr"></div>
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
+        <div class="overlay">
+          <div class="emoji">🌉</div>
+          <div class="title">赵州桥</div>
+          <div class="desc">隋代李春建造 · 世界最早敞肩石拱桥<br>历经1400余年风雨，屹立不倒</div>
+          <div class="year">公元595-605年 · 安济桥</div>
+        </div>
+      </div>
+    </div>
+
+    <a href="./zhao-3d/3d/Untitled-1.html" class="card-link">
+      <div class="jump-card card-unified">
+        <h3>赵州桥 3D 漫游</h3>
+        <p>点击进入沉浸式 3D 模型，探索古桥结构奥秘</p>
+        <span class="btn-text">立即体验 →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- ========== 赵州桥介绍文字 ========== -->
+  <div class="bridge-intro-text">
+    赵州桥是隋代工匠李春建造的世界上最早的大型敞肩圆弧石拱桥，距今已有1400多年历史，被誉为“天下第一桥”。
+  </div>
+  
+  <!-- 底部 chart 容器 -->
+  <div class="chart" id="bottomChart">
+    <table class="history-table">
+      <caption>🏛️ 赵州桥 · 千年功能演变</caption>
+      <thead>
+        <tr><th>功能</th><th>隋唐宋<br><small>(595-1279)</small></th><th>元明清<br><small>(1271-1911)</small></th><th>近现代<br><small>(1912-1990)</small></th><th>当代<br><small>(1991-至今)</small></th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="func-label">🚗 交通</td><td>南北要道</td><td>持续通行</td><td>公路辅桥</td><td>文旅展示</td></tr>
+        <tr><td class="func-label">⚔️ 军事</td><td>战略通道</td><td>军事要冲</td><td>—</td><td>—</td></tr>
+        <tr><td class="func-label">💰 经济</td><td>商贸枢纽</td><td>民间通道</td><td>区域联通</td><td>文旅经济</td></tr>
+        <tr><td class="func-label">📜 文化</td><td>城市标志</td><td>文人题咏</td><td>建筑研究</td><td>世界遗产</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========== 新增：古桥解构区域（完整保留原有所有内容，只在此添加新内容） ========== -->
+  <div class="deconstruction-wrapper">
+    
+    <!-- 一、敞肩拱结构详解 -->
+    <div class="content-section animate-on-scroll" id="structureSection">
+      <div class="section-header">
+        <div class="section-num">一</div>
+        <div class="section-title">敞肩拱结构详解</div>
+        <div class="section-line"></div>
+      </div>
+      
+      <div class="structure-grid">
+        <div class="structure-visual" onclick='showModal("arch", "敞肩拱结构示意", "敞肩拱是赵州桥的核心创新，指在大拱两侧各设两个小拱（泄洪小拱），形成“空腹式”拱桥结构。\n\n主拱跨径37.02米，采用单孔敞肩圆弧拱设计，矢跨比约1:5。\n\n四个小拱的作用：\n• 减轻桥身自重约700吨\n• 增加泄洪面积约16%\n• 增强桥梁稳定性\n• 节约石材约180立方米\n\n这种空腹式拱桥设计，比欧洲早了700余年。")'>
+          <div class="structure-visual-icon">🏛️</div>
+          <div class="structure-visual-text">点击查看结构剖面图</div>
+        </div>
+        
+        <div class="structure-cards">
+          <div class="structure-item" onclick='showModal("main-arch", "主拱结构", "赵州桥的主拱是整个桥梁的核心，采用单孔敞肩圆弧拱设计。\n\n主拱数据：\n• 跨径：37.02米\n• 拱高：7.23米\n• 矢跨比：约1:5\n• 拱券：28道纵向并列\n\n主拱采用“纵向并列砌筑法”建造，这种工艺使每道拱券可以独立承重，即使部分损坏也不会影响整体结构。")'>
+            <div class="structure-item-header">
+              <div class="structure-item-icon">1</div>
+              <div class="structure-item-title">主拱结构</div>
+            </div>
+            <div class="structure-item-desc">单孔敞肩圆弧拱，跨径<span class="highlight">37.02米</span>，矢跨比约1:5，28道纵向并列砌筑</div>
+          </div>
+          
+          <div class="structure-item" onclick='showModal("small-arch", "敞肩小拱", "四个小拱对称布置在大拱两侧，每个直径约3米。\n\n小拱作用：\n• 减轻桥身自重约700吨\n• 增加泄洪面积约16%\n• 节约石材约180立方米\n\n这种空腹式拱桥设计，比欧洲早了700余年，是赵州桥的核心创新。")'>
+            <div class="structure-item-header">
+              <div class="structure-item-icon">2</div>
+              <div class="structure-item-title">敞肩小拱</div>
+            </div>
+            <div class="structure-item-desc">两侧各设两个小拱，减轻自重<span class="highlight">700吨</span>，增加泄洪面积<span class="highlight">16%</span></div>
+          </div>
+          
+          <div class="structure-item" onclick='showModal("iron", "铁件榫卯", "铁件榫卯连接技术领先世界。\n\n腰铁：横向连接拱石，增加整体性\n铁拉杆：纵向贯穿28道拱券\n\n这种金属-石材复合结构，领先欧洲700年。")'>
+            <div class="structure-item-header">
+              <div class="structure-item-icon">3</div>
+              <div class="structure-item-title">铁件榫卯</div>
+            </div>
+            <div class="structure-item-desc">腰铁横向连接，铁拉杆纵向贯穿，将28道拱券紧紧束为一体</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 二、核心技术参数 -->
+    <div class="content-section animate-on-scroll delay-1" id="techSection">
+      <div class="section-header">
+        <div class="section-num">二</div>
+        <div class="section-title">核心技术参数</div>
+        <div class="section-line"></div>
+      </div>
+      
+      <div class="tech-bar-chart">
+        <div class="bar-item" onclick="showModal('p1', '桥全长', '桥全长64.4米，桥面宽9.6米，桥高约7.23米。\n\n桥面平缓，坡度约3-5%，便于行人车马通行。')">
+          <div class="bar-value">64.4米</div>
+          <div class="bar-fill"><span class="bar-number">64.4</span></div>
+          <div class="bar-label">桥全长</div>
+          <div class="bar-note">面宽9.6米</div>
+        </div>
+        <div class="bar-item" onclick="showModal('p2', '净跨径', '净跨径37.02米，是世界现存最早、跨度最大的单孔敞肩石拱桥。\n\n跨径与桥高比例约为5:1，形成优美的圆弧形拱线。')">
+          <div class="bar-value">37.02米</div>
+          <div class="bar-fill"><span class="bar-number">37</span></div>
+          <div class="bar-label">净跨径</div>
+          <div class="bar-note">世界最古最大</div>
+        </div>
+        <div class="bar-item" onclick="showModal('p3', '拱高', '拱高7.23米，矢跨比约1:5。\n\n较低的矢跨比使桥面平缓，便于通行，同时保持足够的泄洪空间。')">
+          <div class="bar-value">7.23米</div>
+          <div class="bar-fill"><span class="bar-number">7.2</span></div>
+          <div class="bar-label">拱高</div>
+          <div class="bar-note">矢跨比1:5</div>
+        </div>
+        <div class="bar-item" onclick="showModal('p4', '拱券数量', '28道拱券纵向并列砌筑，每道由多条石券组成。\n\n这种工艺使每道拱券可独立承重，便于局部维修。')">
+          <div class="bar-value">28道</div>
+          <div class="bar-fill"><span class="bar-number">28</span></div>
+          <div class="bar-label">拱券数量</div>
+          <div class="bar-note">纵向并列砌筑</div>
+        </div>
+        <div class="bar-item" onclick="showModal('p5', '历史跨度', '始建于隋代公元595-605年，历经1400余年风雨仍屹立不倒。\n\n1961年列入第一批全国重点文物保护单位。')">
+          <div class="bar-value">1400+年</div>
+          <div class="bar-fill"><span class="bar-number">1400</span></div>
+          <div class="bar-label">历史跨度</div>
+          <div class="bar-note">隋代至今</div>
+        </div>
+      </div>
+      
+      <table class="compare-table">
+        <thead>
+          <tr><th>对比项</th><th>赵州桥（隋）</th><th>欧洲同类桥</th><th>领先时间</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>敞肩拱首创</td><td>605年</td><td>法国夏特奈桥（14世纪）</td><td>约700年</td></tr>
+          <tr><td>空腹式设计</td><td>隋代</td><td>意大利弗拉塔桥（1449年）</td><td>约840年</td></tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- 三、施工工艺 -->
+    <div class="content-section animate-on-scroll delay-2" id="processSection">
+      <div class="section-header">
+        <div class="section-num">三</div>
+        <div class="section-title">施工工艺</div>
+        <div class="section-line"></div>
+      </div>
+      
+      <div class="process-flow">
+        <div class="process-step" data-step="1" onclick="showModal('proc1', '基础处理', '在桥位处清除淤泥和松软土层，采用天然地基承载。\n\n赵州桥位于洨河冲积平原，地基为细砂夹卵石层，承载力良好，适合建造大型石拱桥。')">
+          <div class="process-title">基础处理</div>
+          <div class="process-desc">清除淤泥，天然地基承载</div>
+        </div>
+        <div class="process-arrow">→</div>
+        <div class="process-step" data-step="2" onclick="showModal('proc2', '拱架搭设', '搭建木制拱架，用于支撑拱石施工。\n\n拱架根据设计好的圆弧曲线制作，确保拱券形状准确。')">
+          <div class="process-title">拱架搭设</div>
+          <div class="process-desc">搭建木制拱架</div>
+        </div>
+        <div class="process-arrow">→</div>
+        <div class="process-step" data-step="3" onclick="showModal('proc3', '拱券砌筑', '采用纵向并列砌筑法，从两端向中间同时砌筑拱石。\n\n每道拱券独立砌筑，完成后拆除拱架，拱券依靠自重和拱形结构稳定。')">
+          <div class="process-title">拱券砌筑</div>
+          <div class="process-desc">纵向并列砌筑</div>
+        </div>
+        <div class="process-arrow">→</div>
+        <div class="process-step" data-step="4" onclick="showModal('proc4', '铁件加固', '拱券完成后，安装腰铁和铁拉杆。\n\n腰铁横向连接拱石，铁拉杆纵向贯穿，将28道拱券连成整体。')">
+          <div class="process-title">铁件加固</div>
+          <div class="process-desc">安装腰铁拉杆</div>
+        </div>
+        <div class="process-arrow">→</div>
+        <div class="process-step" data-step="5" onclick="showModal('proc5', '桥面铺装', '最后铺设桥面石，安装栏板、望柱等附属构件。\n\n桥面平缓，坡度约3-5%，便于行人车马通行。')">
+          <div class="process-title">桥面铺装</div>
+          <div class="process-desc">铺设桥面石</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 四、科学价值 -->
+    <div class="content-section animate-on-scroll delay-3" id="valueSection">
+      <div class="section-header">
+        <div class="section-num">四</div>
+        <div class="section-title">科学价值</div>
+        <div class="section-line"></div>
+      </div>
+      
+      <div class="value-intro">
+        赵州桥集中体现了<span class="highlight">中国古代桥梁建造技术的最高成就</span>，其设计理念和施工工艺领先世界700余年。敞肩拱的发明、轻型拱桥结构的设计、纵向并列砌筑法的应用，都对后世桥梁建筑产生了深远影响。
+      </div>
+      
+      <div class="value-cards">
+        <div class="value-card" onclick='showModal("v1", "工程力学典范", "赵州桥的敞肩拱设计，在力学上实现了最优解：\n\n• 空腹结构减轻自重\n• 拱形分散压力\n• 基础受力均匀\n\n历经1400年、无数次洪水考验，证明其结构设计的科学性。")'>
+          <div class="value-icon">⚙️</div>
+          <div class="value-title">工程力学典范</div>
+          <div class="value-desc">空腹结构减轻自重，拱形分散压力</div>
+          <div class="value-tag">结构科学</div>
+        </div>
+        <div class="value-card" onclick='showModal("v2", "建筑艺术精品", "赵州桥“长虹饮涧”的优美造型，使其不仅是一座交通设施，更是一件建筑艺术品。\n\n• 圆弧拱线条流畅\n• 敞肩小拱比例协调\n• 栏板雕刻精美\n\n集实用与美观于一体。")'>
+          <div class="value-icon">🎨</div>
+          <div class="value-title">建筑艺术精品</div>
+          <div class="value-desc">“长虹饮涧”优美造型</div>
+          <div class="value-tag">艺术价值</div>
+        </div>
+        <div class="value-card" onclick='showModal("v3", "文化遗产瑰宝", "赵州桥是研究中国古代建筑技术、艺术和文化的重要实物例证。\n\n• 隋代原物保留完整\n• 石雕艺术珍稀孤品\n• 历史文献记载详实\n\n1961年列入第一批国保单位。")'>
+          <div class="value-icon">🏆</div>
+          <div class="value-title">文化遗产瑰宝</div>
+          <div class="value-desc">隋代原物保留完整</div>
+          <div class="value-tag">文化传承</div>
+        </div>
+      </div>
+      
+      <div class="quote-block">
+        <div class="quote-text">制造奇特，人不知觉</div>
+        <div class="quote-author">—— 张嘉贞《赵州大石桥铭》· 唐开元年间</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 卷轴式悬浮导航（点击弹出） ========== -->
+  <div class="scroll-nav" id="scrollNav">
+    <div class="scroll-tab" id="scrollTab">📜</div>
+    <div class="scroll-menu" id="scrollMenu">
+      <a href="./index.html" class="scroll-item" style="cursor:default;">
+        <span class="scroll-icon">◀</span>
+        <span class="scroll-title">赵州桥</span>
+        <span class="scroll-desc">敞肩石拱</span>
+      </a>
+      <div class="scroll-line"></div>
+      <a href="../luo-bridge-new/index.html" class="scroll-item">
+        <span class="scroll-icon">▶</span>
+        <span class="scroll-title">洛阳桥</span>
+        <span class="scroll-desc">万安古渡</span>
+      </a>
+    </div>
+  </div>
+
+  <script src="./js/index.js"></script>
+  <script src="./js/card.js"></script>
+  
+  <!-- ========== 新增：滚动动画触发脚本（不影响原有功能） ========== -->
+  <script>
+    (function() {
+      const animateElements = document.querySelectorAll('.animate-on-scroll');
+      
+      function checkInView() {
+        const windowHeight = window.innerHeight;
+        animateElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < windowHeight - 100 && rect.bottom > 0) {
+            el.classList.add('visible');
+          }
+        });
+      }
+      
+      window.addEventListener('scroll', checkInView);
+      window.addEventListener('resize', checkInView);
+      checkInView();
+    })();
+  </script>
+  
+  <!-- ========== 卷轴导航点击脚本 ========== -->
+  <script>
+    (function() {
+      const scrollNav = document.getElementById('scrollNav');
+      const scrollTab = document.getElementById('scrollTab');
+      if (!scrollNav || !scrollTab) return;
+      
+      scrollTab.addEventListener('click', function(e) {
+        e.stopPropagation();
+        scrollNav.classList.toggle('open');
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!scrollNav.contains(e.target)) {
+          scrollNav.classList.remove('open');
+        }
+      });
+      
+      const menuItems = document.querySelectorAll('.scroll-item');
+      menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+          scrollNav.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+  <!-- 底部 chart 滑入脚本（优化版 - 进入视口即触发） -->
+  <script>
+    (function() {
+      const bottomChart = document.getElementById('bottomChart');
+      if (!bottomChart) return;
+      let hasSlid = false;
+      
+      function checkScroll() {
+        const chartRect = bottomChart.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        // 当表格进入视口范围时触发滑入
+        if (chartRect.top < windowHeight - 50 && !hasSlid) {
+          bottomChart.classList.add('slide-in');
+          hasSlid = true;
+        }
+      }
+      
+      window.addEventListener('scroll', checkScroll);
+      setTimeout(checkScroll, 100);
+    })();
+  </script>
+</body>
+</html>
+</body>
+</html>

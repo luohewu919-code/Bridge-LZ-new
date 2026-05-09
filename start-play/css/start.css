@@ -1,0 +1,853 @@
+/* ========== 全局样式 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 20%, #0a101f, #020408);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 科技网格背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(90deg, rgba(0, 255, 255, 0.04) 0px, rgba(0, 255, 255, 0.04) 1px, transparent 1px, transparent 25px),
+                repeating-linear-gradient(0deg, rgba(0, 255, 255, 0.04) 0px, rgba(0, 255, 255, 0.04) 1px, transparent 1px, transparent 25px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ========== 登录表单容器 ========== */
+        .login-wrapper {
+            position: fixed;
+            left: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        }
+
+        /* 登录框激活状态（移动到中间） */
+        .login-wrapper.center-mode {
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 向左移动状态（更靠左） */
+        .login-wrapper.move-left {
+            left: 20px;
+            transform: translateY(-50%);
+        }
+
+        /* ========== 动画外层盒子 ========== */
+        .animation-wrapper {
+            position: fixed;
+            right: 400px;
+            top: 35%;
+            transform: translateY(-50%);
+            z-index: 10;
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        }
+
+        /* 动画激活状态：向右移动400px，向上移动20px */
+        .animation-wrapper.active-move {
+            transform: translateY(calc(-50% - 20px)) translateX(400px);
+        }
+
+        /* 向左移动状态（动画也向左移动） */
+        .animation-wrapper.move-left {
+            right: auto;
+            left: 50px;
+            transform: translateY(-50%);
+        }
+
+        /* 动画内容容器 */
+        .anim-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            width: 500px;
+            height: 620px;
+            filter: drop-shadow(0 0 20px rgba(0, 180, 240, 0.25));
+        }
+
+        /* ========== 登录表单样式 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            color: #eee;
+            user-select: none;
+            font-family: 'Poppins',sans-serif;
+        }
+        .login {
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 200px;
+            height: 280px;
+            background-color: #34495e;
+            border-radius: 10px;
+            box-shadow: 10px 10px 20px rgba(33, 44, 55, 0.3);
+        }
+
+        h1 {
+            color: #fff;
+            margin-top: 20px;
+            font-size: 45px;
+            font-weight: 470;
+            z-index: 1;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            height: 230px;
+            z-index: 1;
+        }
+        input {
+            width: 150px;
+            height: 40px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid #eee;
+            font-size: 16px;
+            outline: none;
+        }
+        input::placeholder {
+            font-size: 12px;
+            color: #eee;
+        }
+        button {
+            width: 100px;
+            height: 36px;
+            border: 1px solid #eee;
+            border-radius: 18px;
+            background-color: transparent;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .login span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            background-color: #606060;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+
+        @keyframes in {
+            0% { width: 0; height: 0; }
+            100% { width: 1200px; height: 1200px; }
+        }
+
+        @keyframes out {
+            0% { width: 1200px; height: 1200px; }
+            100% { width: 0; height: 0; }
+        }
+
+        .btn {
+            position: relative;
+            overflow: hidden;
+            width: 140px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            border: none;
+            background: #000;
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: #fff;
+            mix-blend-mode: difference;
+            border-radius: 50%;
+            transform: translate(-100%, 50%);
+            transition: 0.3s;
+        }
+
+        .btn:hover::before {
+            transition: 0.3s;
+            transform: translate(0, 0);
+            border-radius: 0;
+        }
+
+        .btn:active {
+            transition: 0.3s;
+            transform: translateY(5px);
+        }
+
+        .btn .text {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            line-height: 1;
+        }
+        .btn .text {
+            position: relative;
+            top: auto;
+            left: auto;
+            width: auto;
+            height: auto;
+            background-color: transparent;
+            transform: none;
+            border-radius: 0;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #eee;
+        }
+        .btn:hover .text {
+            color: #000;
+        }
+
+        /* ========== 动画内部样式 ========== */
+        .data-panel {
+            position: absolute;
+            background: rgba(8, 20, 32, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 210, 255, 0.8);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: all 0.4s cubic-bezier(0.2, 0.85, 0.4, 1.1);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .data-panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #0cf, #0cf, transparent);
+            animation: sweepLine 3s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes sweepLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .panel-front {
+            width: 80px;
+            height: 35px;
+            z-index: 15;
+            left: 44%;
+            top: 48%;
+            transform: translate(-50%, -50%) rotate(-1.5deg);
+            background: rgba(10, 25, 40, 0.88);
+            border-color: #0cf;
+        }
+
+        .panel-back {
+            width: 136px;
+            height: 59.5px;
+            z-index: 12;
+            left: 48%;
+            top: 52%;
+            transform: translate(-50%, -50%) rotate(2deg);
+            background: rgba(6, 18, 28, 0.8);
+            border-color: #39f0ff;
+        }
+
+        .grid-matrix {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 8px;
+        }
+
+        .cell-dot {
+            width: 7px;
+            height: 7px;
+            background: #0cf;
+            border-radius: 1px;
+            box-shadow: 0 0 8px #0cf;
+            animation: pulseNexus 1s infinite alternate;
+        }
+
+        @keyframes pulseNexus {
+            0% { opacity: 0.4; transform: scale(0.7); background: #0cf; }
+            100% { opacity: 1; transform: scale(1.2); background: #6effff; }
+        }
+
+        .data-label {
+            font-size: 8px;
+            text-align: center;
+            color: #bbf0ff;
+            letter-spacing: 1.8px;
+            font-family: 'Share Tech Mono', monospace;
+            margin-top: 2px;
+            border-top: 0.5px solid rgba(0, 210, 255, 0.5);
+            padding-top: 2px;
+        }
+
+        .anim-container:hover .panel-front:not(.click-scale-anim) {
+            transform: translate(-55%, -48%) rotate(-6deg) translateX(-12px);
+            left: 40%;
+        }
+
+        .anim-container:hover .panel-back:not(.click-scale-anim) {
+            transform: translate(-45%, -54%) rotate(7deg) translateX(10px);
+            left: 55%;
+        }
+
+        .panel-front.click-scale-anim {
+            transform: translate(-50%, -50%) scale(1.2) translateY(-5px) rotate(-1deg) !important;
+            left: 44% !important;
+            transition: transform 0.32s cubic-bezier(0.2, 1.1, 0.3, 1.2) !important;
+            z-index: 22;
+            border-color: #ffd966;
+            box-shadow: 0 0 24px rgba(0, 255, 210, 0.7);
+        }
+
+        .panel-back.right-click-scale {
+            transform: translate(-50%, -50%) scale(1.3) translateY(-5px) rotate(1deg) !important;
+            left: 48% !important;
+            transition: transform 0.32s cubic-bezier(0.18, 1.1, 0.3, 1.2) !important;
+            z-index: 25;
+            border-color: #f0b27a;
+            box-shadow: 0 0 28px rgba(0, 220, 210, 0.8);
+        }
+
+        .tech-magnifier {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            z-index: 26;
+            pointer-events: none;
+        }
+
+        .lens-glass {
+            width: 38px;
+            height: 38px;
+            background: radial-gradient(circle, rgba(0, 230, 250, 0.4), rgba(0, 120, 160, 0.6));
+            border-radius: 50%;
+            border: 2px solid #0cf;
+            box-shadow: 0 0 16px cyan, inset 0 0 8px rgba(255,255,210,0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        .orbit-track {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 260px;
+            height: 90px;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .ring-svg {
+            width: 100%;
+            height: 100%;
+            transform-origin: center;
+        }
+
+       
+
+        .ring-ellipse {
+            fill: none;
+            stroke: #2ec7ff;
+            stroke-width: 2.2;
+            stroke-dasharray: 5 7;
+            filter: drop-shadow(0 0 6px #0cf);
+            transform-origin: center;
+            animation: ringRotate 6s linear infinite;
+        }
+
+        .bridge-message {
+            position: absolute;
+            display: none;
+            background: rgba(0, 20, 30, 0.96);
+            backdrop-filter: blur(14px);
+            border-radius: 14px;
+            border: 1px solid #0cf;
+            box-shadow: 0 0 22px rgba(0, 200, 255, 0.5);
+            padding: 6px 14px;
+            font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+            font-size: 10px;
+            color: #d6f0ff;
+            white-space: nowrap;
+            z-index: 210;
+            pointer-events: none;
+        }
+
+        .bridge-message.show {
+            display: block;
+            animation: msgAppear 0.32s cubic-bezier(0.2, 1.1, 0.3, 1.2) forwards;
+        }
+
+        @keyframes msgAppear {
+            0% { opacity: 0; transform: rotate(-7deg) scale(0.3); filter: blur(4px); }
+            100% { opacity: 1; transform: rotate(0deg) scale(1); filter: blur(0); }
+        }
+
+        .right-message-container {
+            position: absolute;
+            display: none;
+            z-index: 210;
+            cursor: pointer;
+        }
+
+        .svg-circle-bg {
+            width: 20px;
+            height: 20px;
+            background: #1a3048;
+            border-radius: 50%;
+            border: 1px solid #7fd6ff;
+            box-shadow: 0 0 8px #0cf;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .svg-icon-bridge {
+            width: 14px;
+            height: 14px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .right-message-container.revealed .svg-icon-bridge {
+            opacity: 1;
+        }
+
+        .glow-particle {
+            position: absolute;
+            background: #0cf;
+            border-radius: 50%;
+            filter: blur(1px);
+            pointer-events: none;
+            opacity: 0.6;
+            animation: floatTech 1.5s ease-out forwards;
+            z-index: 18;
+        }
+
+        @keyframes floatTech {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: translateY(-35px) scale(0); opacity: 0; }
+        }
+
+        /* ========== 左右控制按钮样式 ========== */
+        .control-btn {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 60px;
+            background: rgba(0, 20, 40, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid #0cf;
+            border-radius: 12px;
+            color: #0cf;
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+            font-family: monospace;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 200, 255, 0.2);
+            box-shadow: 0 0 16px rgba(0, 255, 255, 0.6);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .btn-left {
+            left: 10px;
+        }
+
+        .btn-right {
+            right: 10px;
+        }
+
+        .control-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        /* ========== 左上角标题容器 ========== */
+        .title-wrapper {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 200;
+            font-family: 'Poppins', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* 主标题 — 流边边框（脉冲流光） */
+        .bridge-title-flow {
+            font-size: 18px;
+            font-weight: 500;
+            color: #c9a962;
+            background: rgba(0, 20, 40, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 40px;
+            letter-spacing: 2px;
+            white-space: nowrap;
+            position: relative;
+            border: 1px solid rgba(0, 210, 255, 0.5);
+            box-shadow: 0 0 12px rgba(0, 180, 240, 0.2);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bridge-title-flow:hover {
+            background: rgba(0, 30, 50, 0.85);
+            border-color: #0cf;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        /* 流边边框动画 - 流动光效 */
+        .bridge-title-flow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(0, 255, 255, 0.5), 
+                rgba(0, 255, 255, 0.5), 
+                transparent);
+            border-radius: 40px;
+            animation: flowBorder 2s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes flowBorder {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* 装饰星星 */
+        .bridge-title-flow span::before {
+            content: '✦';
+            margin-right: 10px;
+            font-size: 14px;
+            color: #0cf;
+            animation: twinkle 1.5s ease-in-out infinite;
+        }
+
+        .bridge-title-flow span::after {
+            content: '✦';
+            margin-left: 10px;
+            font-size: 14px;
+            color: #0cf;
+            animation: twinkle 1.5s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.4; text-shadow: 0 0 2px #0cf; }
+            50% { opacity: 1; text-shadow: 0 0 8px #0cf; }
+        }
+
+        /* ========== 右侧水平菜单（从右边滑出） ========== */
+        .right-menu {
+            display: flex;
+            gap: 12px;
+            margin-left: 40px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-20px);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            pointer-events: none;
+        }
+
+        /* 鼠标悬停标题区域时，菜单从右边滑入 */
+        .title-wrapper:hover .right-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        /* 菜单项样式 */
+        .menu-item {
+            background: rgba(0, 20, 40, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            border-radius: 30px;
+            padding: 8px 18px;
+            color: #c9a962;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-item:hover {
+            background: rgba(0, 200, 255, 0.2);
+            border-color: #0cf;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+        }
+
+        /* 菜单项前面的小图标 */
+        .menu-item::before {
+            content: '▸';
+            margin-right: 8px;
+            color: #0cf;
+            font-size: 12px;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .menu-item:hover::before {
+            transform: translateX(3px);
+        }
+
+        /* 延迟隐藏：鼠标离开整个title-wrapper区域后，等待1s再隐藏 */
+        .title-wrapper:not(:hover) .right-menu {
+            transition-delay: 1s;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-20px);
+            pointer-events: none;
+        }
+
+        /* 保持菜单可见时无延迟 */
+        .title-wrapper:hover .right-menu {
+            transition-delay: 0s;
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .right-menu {
+                margin-left: 20px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .menu-item {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+
+        /* ========== 气泡消息框 ========== */
+        .bubble-toast {
+            position: fixed;
+            top: 25px;
+            right: 30px;
+            max-width: 300px;
+            background: linear-gradient(135deg, rgba(0, 30, 50, 0.96), rgba(0, 20, 40, 0.98));
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid rgba(0, 210, 255, 0.7);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 255, 0.3);
+            padding: 16px 22px;
+            color: #e6f7ff;
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            z-index: 1000;
+            cursor: pointer;
+            transform-origin: right center;
+            animation: bubblePopIn 0.45s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+        }
+
+        .bubble-toast .deco-rect {
+            position: absolute;
+            bottom: -14px;
+            right: 24px;
+            width: 36px;
+            height: 14px;
+            background: linear-gradient(135deg, rgba(0, 30, 50, 0.96), rgba(0, 20, 40, 0.98));
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 210, 255, 0.7);
+            border-radius: 12px;
+            z-index: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .bubble-toast .deco-circle {
+            position: absolute;
+            bottom: -24px;
+            right: 30px;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #0cf, #0a8caf);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
+            z-index: 2;
+            animation: pulseDot 1.2s ease-in-out infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(1); opacity: 0.7; box-shadow: 0 0 6px cyan; }
+            50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px cyan; }
+        }
+
+        @keyframes bubblePopIn {
+            0% {
+                opacity: 0;
+                transform: translateX(60px) scale(0.55) skewX(12deg);
+                filter: blur(6px);
+            }
+            45% {
+                opacity: 0.95;
+                transform: translateX(-6px) scale(1.02) skewX(-2deg);
+            }
+            70% {
+                transform: translateX(4px) scale(0.98) skewX(1deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1) skewX(0deg);
+                filter: blur(0);
+            }
+        }
+
+        .bubble-toast.bubble-out {
+            animation: bubblePopOut 0.35s ease forwards;
+        }
+
+        @keyframes bubblePopOut {
+            0% {
+                opacity: 1;
+                transform: translateX(0) scale(1) skewX(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(40px) scale(0.7) skewX(8deg);
+                filter: blur(4px);
+                visibility: hidden;
+            }
+        }
+
+        /* ========== 登录表单容器 ========== */
+        .login-wrapper {
+            position: fixed;
+            left: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        }
+
+        .login-wrapper.center-mode {
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .animation-wrapper {
+            position: fixed;
+            right: 400px;
+            top: 35%;
+            transform: translateY(-50%);
+            z-index: 10;
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        }
+
+        .animation-wrapper.active-move {
+            transform: translateY(calc(-50% - 20px)) translateX(400px);
+        }
+
+        .control-btn {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 60px;
+            background: rgba(0, 20, 40, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid #0cf;
+            border-radius: 12px;
+            color: #0cf;
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+            font-family: monospace;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        .btn-left { left: 10px; }
+        .btn-right { right: 10px; }
+        .control-btn:hover {
+            background: rgba(0, 200, 255, 0.2);
+            box-shadow: 0 0 16px rgba(0, 255, 255, 0.6);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        /* 曲线完全隐藏（display: none） + 小圆依然涌动（独立） */
+        .glow-curve-container {
+            display: none;
+        }
+
+        /* 涌动的小圆（脉动缩放 + 路径跟随，无曲线视觉） */
+        .pulsing-dot {
+            position: fixed;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle, #ffffff, #0cf);
+            border-radius: 50%;
+            box-shadow: 0 0 20px cyan;
+            z-index: 46;
+            pointer-events: auto;
+            cursor: pointer;
+            animation: scalePulse 0.7s infinite ease-in-out;
+        }
+
+        @keyframes scalePulse {
+            0%, 100% { transform: scale(0.7); opacity: 0.9; box-shadow: 0 0 8px cyan; }
+            50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 20px cyan; }
+        }

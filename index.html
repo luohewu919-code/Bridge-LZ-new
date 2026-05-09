@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>数字文化遗产 · 双栏布局</title>
+    <link rel="stylesheet" href="./start-play/css/start.css">
+    <link rel="stylesheet" href="./start-play/css/transition.css">
+</head>
+<body>
+
+    <!-- 开场动画层：全屏矩形，1秒后底部中心缩小成圆并消失 -->
+    <div id="introOverlay" class="intro-overlay">
+        <h2>✦ 灵境启程 ✦</h2>
+        <p>数字文化遗产 · 桥梁史诗</p>
+        <p style="font-size: 0.8rem; margin-top: 1.5rem;">矩形归圆 · 万象新生</p>
+    </div>
+
+    <!-- 左下角曲线容器：已隐藏 -->
+    <div class="glow-curve-container" style="display: none;">
+        <svg width="100%" height="100%" viewBox="0 0 520 320" preserveAspectRatio="none">
+            <path id="hiddenSmoothCurve" 
+                  d="M 15 290 
+                     C 70 240, 110 200, 170 170 
+                     S 250 120, 320 140 
+                     S 400 190, 450 140 
+                     S 490 80, 500 50" />
+        </svg>
+    </div>
+
+    <!-- 左上角标题 + 右侧水平菜单 -->
+    <div class="title-wrapper">
+        <div class="bridge-title-flow">
+            <span></span>桥梁设计 · 数字文化遗产
+        </div>
+        <div class="right-menu">
+            <div class="menu-item" data-link="#">遗产名录</div>
+            <div class="menu-item" data-link="#">桥梁档案</div>
+            <div class="menu-item" data-link="#">历史文献</div>
+            <div class="menu-item" data-link="#">数字展馆</div>
+            <div class="menu-item" data-link="#">关于项目</div>
+        </div>
+    </div>
+
+    <!-- 左边登录表单 -->
+    <div class="login-wrapper" id="loginWrapper">
+        <div class="login">
+            <h1>Login</h1>
+            <form id="loginForm">
+                <input type="text" id="nicknameInput" placeholder="昵称" autocomplete="off">
+                <button type="button" class="btn" id="startBtn">
+                    <span class="text">出发</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 右边动画盒子 -->
+    <div class="animation-wrapper" id="animationWrapper">
+        <div class="anim-container" id="animContainer">
+            <div class="data-panel panel-front" id="leftTable">
+                <div class="grid-matrix">
+                    <div class="cell-dot"></div><div class="cell-dot"></div><div class="cell-dot"></div>
+                    <div class="cell-dot"></div>
+                </div>
+                <div class="data-label">FRONT NEX</div>
+            </div>
+            <div class="data-panel panel-back" id="rightTable">
+                <div class="grid-matrix">
+                    <div class="cell-dot"></div><div class="cell-dot"></div><div class="cell-dot"></div>
+                    <div class="cell-dot"></div><div class="cell-dot"></div><div class="cell-dot"></div>
+                    <div class="cell-dot"></div><div class="cell-dot"></div>
+                </div>
+                <div class="data-label">⚡ BACK CORE ⚡</div>
+            </div>
+            <div class="tech-magnifier" id="techGlass">
+                <div class="lens-glass"></div>
+            </div>
+            <div class="orbit-track">
+                <svg class="ring-svg" viewBox="0 0 280 100" preserveAspectRatio="none">
+                    <ellipse class="ring-ellipse" cx="140" cy="48" rx="118" ry="38" />
+                </svg>
+            </div>
+            <div id="leftMsg" class="bridge-message">你好，这里是桥梁设计</div>
+            <div id="rightMsgContainer"class="right-message-container">
+                <div class="svg-circle-bg">
+                    <div class="svg-icon-bridge">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="#cafff0" stroke-width="1.8">
+                            <path d="M7 16v-3c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4v3"/>
+                            <path d="M5 21h20"/>
+                            <path d="M11 10V7"/><path d="M17 10V7"/>
+                            <path d="M14 21v-5"/><path d="M10 16h8"/>
+                            <rect x="12" y="4" width="4" height="3" rx="1"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左右控制按钮 -->
+    <div class="control-btn btn-left" id="btnLeft">◀</div>
+    <div class="control-btn btn-right" id="btnRight">▶</div>
+
+    <script src="./start-play/js/animal.js"></script>
+    <script src="./start-play/js/transition.js"></script>
+    
+    <!-- ========== 唯一的登录跳转脚本（已整合所有功能）========== -->
+    <script>
+(function () {
+
+    const login = document.querySelector('.login');
+    const nicknameInput = document.querySelector('#nicknameInput');
+    const startBtn = document.getElementById('startBtn');
+
+    let span;
+    let inTime, outTime;
+    let isIn = true;
+    let isOut;
+
+    // =========================
+    // 提示消息
+    // =========================
+    function showMessage(text, isError = false) {
+
+        const oldMsg = document.querySelector('.toast-message');
+        if (oldMsg) oldMsg.remove();
+
+        const msg = document.createElement('div');
+        msg.className = 'toast-message';
+        msg.textContent = text;
+
+        msg.style.cssText = `
+            position: fixed;
+            top: 30px;
+            right: -400px;
+            background: ${isError ? '#c0392b' : '#0cf'};
+            color: ${isError ? '#fff' : '#000'};
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: system-ui, 'Segoe UI', sans-serif;
+            z-index: 9999;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+            transition: right 0.35s cubic-bezier(0.2,0.9,0.4,1.1);
+            backdrop-filter: blur(4px);
+            letter-spacing: 1px;
+            font-weight: 500;
+            border-left: 4px solid rgba(255,255,255,0.6);
+        `;
+
+        document.body.appendChild(msg);
+
+        setTimeout(() => {
+            msg.style.right = '30px';
+        }, 10);
+
+        setTimeout(() => {
+            msg.style.right = '-400px';
+
+            setTimeout(() => {
+                if (msg && msg.parentNode) {
+                    msg.remove();
+                }
+            }, 350);
+
+        }, 2800);
+    }
+
+    // =========================
+    // 保存昵称
+    // =========================
+    function saveNickname(nickname) {
+        localStorage.setItem('userNickname', nickname);
+        showMessage(`✔️ 昵称「${nickname}」已保存`);
+    }
+
+    // =========================
+    // 页面跳转
+    // =========================
+    function goToTarget() {
+
+        const targetUrl = './zhao-bridge-new/index.html';
+
+        console.log('跳转地址:', targetUrl);
+
+        window.location.href = targetUrl;
+    }
+
+    // =========================
+    // 点击按钮
+    // =========================
+    if (startBtn) {
+
+        startBtn.addEventListener('click', (e) => {
+
+            e.preventDefault();
+
+            const nickname = nicknameInput.value.trim();
+
+            if (!nickname) {
+                showMessage('❌ 请输入昵称', true);
+                return;
+            }
+
+            saveNickname(nickname);
+
+            setTimeout(() => {
+                goToTarget();
+            }, 200);
+
+        });
+    }
+
+    // =========================
+    // 回车提交
+    // =========================
+    const loginForm = document.getElementById('loginForm');
+
+    if (loginForm) {
+
+        loginForm.addEventListener('keypress', (e) => {
+
+            if (e.key === 'Enter') {
+
+                e.preventDefault();
+
+                const nickname = nicknameInput.value.trim();
+
+                if (!nickname) {
+                    showMessage('❌ 请输入昵称', true);
+                    return;
+                }
+
+                saveNickname(nickname);
+
+                setTimeout(() => {
+                    goToTarget();
+                }, 200);
+            }
+        });
+    }
+
+    // =========================
+    // 波纹动画
+    // =========================
+    if (login) {
+
+        login.addEventListener('mouseenter', function (e) {
+
+            isOut = false;
+
+            if (isIn) {
+
+                inTime = new Date().getTime();
+
+                span = document.createElement('span');
+
+                login.appendChild(span);
+
+                span.style.animation = 'in .5s ease-out forwards';
+
+                let top = e.clientY - e.target.offsetTop;
+                let left = e.clientX - e.target.offsetLeft;
+
+                span.style.top = top + 'px';
+                span.style.left = left + 'px';
+
+                isIn = false;
+                isOut = true;
+            }
+        });
+
+        login.addEventListener('mouseleave', function (e) {
+
+            if (isOut) {
+
+                outTime = new Date().getTime();
+
+                let passTime = outTime - inTime;
+
+                if (passTime < 500) {
+
+                    setTimeout(() => {
+                        mouseleave(e);
+                    }, 500 - passTime);
+
+                } else {
+
+                    mouseleave(e);
+                }
+            }
+
+            function mouseleave(e) {
+
+                if (!span) return;
+
+                span.style.animation = 'out .5s ease-out forwards';
+
+                let top = e.clientY - e.target.offsetTop;
+                let left = e.clientX - e.target.offsetLeft;
+
+                span.style.top = top + 'px';
+                span.style.left = left + 'px';
+
+                setTimeout(() => {
+
+                    if (span && login.contains(span)) {
+                        login.removeChild(span);
+                    }
+
+                    isIn = true;
+
+                }, 500);
+            }
+        });
+    }
+
+})();
+</script>
+</body>
+</html>

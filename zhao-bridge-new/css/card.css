@@ -1,0 +1,219 @@
+*{
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins',sans-serif;
+    }
+    /* 优化 cultural-section 外观：更科技、毛玻璃、现代感，保留原有动画 */
+    .cultural-section{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      right: 20px;
+      top: 30px;
+      position: absolute;
+      /* 去除粉色，改为深色半透明毛玻璃 */
+      background: rgba(10, 20, 35, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      border: 1px solid rgba(255, 170, 68, 0.4);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      min-width: 50%;
+      height: 300px;
+      overflow: visible;
+      color: rgb(91, 69, 255);
+      /* 初始状态：右上角 + 向外倾斜15度 + 放大1.5倍 */
+      opacity: 0;
+      transform: translateX(200px) translateY(-100px) scale(1.5) rotate(15deg);
+      transition: all 0.9s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+      pointer-events: none;
+    }
+    .cultural-section.visible {
+      opacity: 1;
+      transform: translateX(0) translateY(0) scale(1) rotate(0deg);
+      pointer-events: auto;
+    }
+    
+    /* 竖向标题优化：初始状态隐藏，飞入后渐变金色 */
+    .cultural-title {
+      writing-mode: vertical-lr;
+      position: absolute;
+      top: 20px;
+      left: 15px;
+      text-align: center;
+      margin: 0;
+      line-height: 1.3;
+      /* font-family: 'Mircro', 'Poppins', 'Noto Serif SC', serif; */
+      font-family: "'Microsoft YaHei',sans-serif";
+      transition: all 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+      font-size: 0;
+      font-weight: 0;
+      letter-spacing: -3px;
+      color: transparent;
+      white-space: nowrap;
+    }
+    .cultural-section.visible .cultural-title {
+      font-size: 30px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffdd99, #ffaa44);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: none;
+      filter: drop-shadow(0 0 6px rgba(255,170,68,0.3));
+    }
+    
+    /* 卡片容器优化：半透明深色，内发光 */
+    .container{
+      position: relative;
+      width: 60%;
+      height: 80%;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(4px);
+      border-radius: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 0 20px rgba(255,170,68,0.1), 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .container .card{
+      position: absolute;
+      width: 100px;
+      height: 150px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #2a3a4a, #1e2a36);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #ffcc88;
+      font-size: 36px;
+      font-weight: 700;
+      border: 1px solid rgba(255, 200, 100, 0.6);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+      transform-origin: 50% 100%;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+    }
+    .container .card:hover {
+      filter: brightness(1.1);
+      transform: scale(1.02);
+      border-color: #ffcc66;
+      box-shadow: 0 0 18px rgba(255,200,100,0.5);
+    }
+    /* 保持原有扇形悬停效果 */
+    .container:hover .card{
+      transform: rotate(calc(var(--i) * 5deg)) translate(calc(var(--i) * 50px), -30px);
+    }
+    .container .card:hover{
+      translate: calc(var(--i) * 10px) -20px;
+      z-index: 100;
+    }
+    
+    /* 以下为原有弹窗等样式（未改动） */
+    .floating-card-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .floating-card-overlay.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+    .floating-card {
+      width: 400px;
+      height: 540px;
+      position: relative;
+      cursor: default;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      transform: rotateY(0deg);
+      border-radius: 20px;
+    }
+    .floating-card.flipped {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+    }
+    .card-front {
+      background: linear-gradient(145deg, #2c3e50, #1a2632);
+      border: 2px solid #ffaa44;
+    }
+    .card-back {
+      background: linear-gradient(145deg, #1a2632, #2c3e50);
+      border: 2px solid #ffaa44;
+      transform: rotateY(180deg);
+      padding: 20px;
+      justify-content: flex-start;
+    }
+    .card-back-img {
+      width: 100%;
+      height: 60%;
+      object-fit: cover;
+      display: block;
+      border-radius: 16px;
+      margin-top: 10px;
+    }
+    .card-back-desc {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 15px 10px;
+      text-align: center;
+    }
+    .card-back-desc p {
+      font-size: 14px;
+      color: #ddd;
+      line-height: 1.6;
+    }
+    .card-icon-emoji {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 26px;
+      font-weight: bold;
+      color: #ffcc66;
+      margin-bottom: 10px;
+    }
+    .card-subtitle {
+      font-size: 13px;
+      color: #aaa;
+    }
+    .close-hint {
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }

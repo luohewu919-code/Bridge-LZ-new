@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>洛阳桥·古桥之美 | 深色雅致版</title>
+    <link rel="stylesheet" href="./style/index.css">
+    <style>
+        /* ========== 雾气覆盖区域样式（完整保留原有） ========== */
+        .mist-overlay-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 9998;
+            pointer-events: none;
+            overflow: hidden;
+            visibility: hidden;
+        }
+
+        .mist-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(135deg, rgba(20, 25, 35, 0.95), rgba(10, 15, 25, 0.98));
+            transition: height 0.08s linear;
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+        }
+
+        .mist-layout {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            height: 100%;
+            padding: 0 40px;
+        }
+
+        .mist-mask-image {
+            width: 320px;
+            height: 320px;
+            object-fit: cover;
+            opacity: 0;
+            z-index: 10;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            mask-image: url('./images/border.png');
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            -webkit-mask-image: url('./images/border.png');
+            border: 2px solid rgba(212, 184, 122, 0.7);
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+            flex-shrink: 0;
+        }
+
+        /* 时间轴样式 */
+        .timeline-wrapper {
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            padding-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .timeline-wrapper.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .timeline-wrapper::-webkit-scrollbar {
+            width: 4px;
+        }
+        .timeline-wrapper::-webkit-scrollbar-track {
+            background: rgba(212, 184, 122, 0.1);
+            border-radius: 2px;
+        }
+        .timeline-wrapper::-webkit-scrollbar-thumb {
+            background: #d4b87a;
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            background: rgba(30, 35, 48, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(212, 184, 122, 0.3);
+            padding: 16px 18px;
+            margin-bottom: 15px;
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        }
+
+        .timeline-item.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-icon {
+            font-size: 28px;
+            font-weight: bold;
+            color: #d4b87a;
+        }
+
+        .timeline-year {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffcc66;
+        }
+
+        .timeline-dynasty {
+            font-size: 11px;
+            color: #a8987a;
+            margin-bottom: 4px;
+        }
+
+        .timeline-era {
+            font-size: 14px;
+            font-weight: bold;
+            color: #d4b87a;
+            margin-bottom: 8px;
+        }
+
+        .timeline-desc {
+            color: #c8c2b0;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .timeline-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .timeline-tag {
+            font-size: 10px;
+            padding: 3px 10px;
+            background: rgba(212, 184, 122, 0.2);
+            border-radius: 20px;
+            color: #ffcc66;
+        }
+
+        /* ========== 美化后的表格样式 ========== */
+        .table-wrapper {
+            width: 420px;
+            background: rgba(18, 22, 32, 0.75);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            border: 1px solid rgba(212, 184, 122, 0.5);
+            padding: 20px 18px;
+            opacity: 1;
+            visibility: visible;
+            flex-shrink: 0;
+            box-shadow: 0 15px 35px -12px rgba(0,0,0,0.4);
+        }
+
+        .table-title {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #f2e0b0, #cfaa73);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(212, 184, 122, 0.35);
+            position: relative;
+        }
+        .table-title::before,
+        .table-title::after {
+            content: "❦";
+            font-size: 0.9rem;
+            color: #d4b87a;
+            opacity: 0.6;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .table-title::before { left: 10px; }
+        .table-title::after { right: 10px; }
+
+        .function-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        .function-table th {
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 12px 8px;
+            color: #ecd9a8;
+            background: rgba(28, 32, 44, 0.6);
+            border-bottom: 2px solid rgba(212, 184, 122, 0.5);
+        }
+
+        .function-table td {
+            padding: 10px 8px;
+            font-size: 0.8rem;
+            color: #ded7c4;
+            background: rgba(22, 26, 36, 0.4);
+            border-bottom: 1px solid rgba(212, 184, 122, 0.12);
+            transition: all 0.2s ease;
+        }
+
+        .function-table td:first-child {
+            font-weight: 500;
+            color: #e6cf96;
+            background: rgba(28, 32, 44, 0.3);
+        }
+
+        .function-table tr:hover td {
+            background: rgba(45, 52, 70, 0.7);
+            color: #fff2df;
+        }
+
+        .table-footer-note {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.65rem;
+            color: #8f846a;
+            border-top: 1px solid rgba(212, 184, 122, 0.2);
+            padding-top: 12px;
+            letter-spacing: 1px;
+        }
+
+        /* 烟雾粒子效果 */
+        .mist-particles {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 50% 100%, rgba(30, 35, 45, 0.4), transparent);
+            pointer-events: none;
+        }
+
+        .mist-particles::before,
+        .mist-particles::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(50, 55, 65, 0.15) 2px, transparent 2px);
+            background-size: 40px 40px;
+            animation: mistFloat 20s linear infinite;
+        }
+        .mist-particles::after {
+            animation: mistFloatReverse 25s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes mistFloat {
+            0% { transform: translateY(0) translateX(0); }
+            100% { transform: translateY(-50%) translateX(-25%); }
+        }
+        @keyframes mistFloatReverse {
+            0% { transform: translateY(0) translateX(0); }
+            100% { transform: translateY(-50%) translateX(25%); }
+        }
+
+        .mist-waves {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            z-index: 3;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .mist-waves svg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .mist-parallax > use {
+            animation: mistMove 6s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+        }
+        .mist-parallax > use:nth-child(1) {
+            animation-delay: -2s;
+            animation-duration: 10s;
+        }
+        .mist-parallax > use:nth-child(2) {
+            animation-delay: -3s;
+            animation-duration: 14s;
+        }
+        .mist-parallax > use:nth-child(3) {
+            animation-delay: -4s;
+            animation-duration: 18s;
+        }
+
+        @keyframes mistMove {
+            0% { transform: translate3d(-90px, 0, 0); }
+            100% { transform: translate3d(85px, 0, 0); }
+        }
+
+        .mist-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: #a8987a;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 10000;
+            pointer-events: none;
+            border: 1px solid rgba(212, 184, 122, 0.2);
+        }
+
+        /* 3D建模卡片样式 */
+        .model-card {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 50px;
+            padding: 12px 15px;
+            background: #1a1d24;
+            border-radius: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: 1px solid rgba(212, 184, 122, 0.3);
+            z-index: 9999;
+            text-align: center;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            white-space: nowrap;
+        }
+
+        .model-card:hover {
+            width: 260px;
+        }
+
+        .model-card h3 {
+            margin: 0 0 5px 0;
+            color: #d4b87a;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.2s ease 0.1s;
+        }
+
+        .model-card p {
+            color: #ccc;
+            font-size: 12px;
+            margin: 0 0 10px 0;
+            opacity: 0;
+            transition: opacity 0.2s ease 0.15s;
+        }
+
+        .model-card .model-btn {
+            width: 100%;
+            padding: 8px 0;
+            background: #d4b87a;
+            color: #111;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.2s ease 0.2s;
+        }
+
+        .model-card:hover h3,
+        .model-card:hover p,
+        .model-card:hover .model-btn {
+            opacity: 1;
+        }
+
+        .model-card:hover::after {
+            opacity: 0;
+        }
+
+        .model-card::after {
+            content: "🌐";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            transition: opacity 0.2s;
+        }
+
+        #modelPage {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0c0c0e;
+            z-index: 99999;
+        }
+        .close-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #d4b87a;
+            color: #111;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 10;
+            font-size: 16px;
+        }
+        #modelLoading {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0c0c0e;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999999;
+        }
+        .loader {
+            width: 100px;
+            position: relative;
+        }
+        .loader div {
+            width: 30px;
+            height: 30px;
+            background-color: #d4b87a;
+            position: absolute;
+            left: calc(var(--i) * 30px);
+            animation: move 2s linear infinite;
+            animation-delay: calc(var(--i) * -400ms);
+        }
+        @keyframes move {
+            0% { left: 150px; top: 0; }
+            80% { left: 0; top: 0; }
+            85% { left: 0; top: -30px; width: 30px; height: 30px; }
+            88% { left: 0; top: -30px; }
+            90% { width: 60px; height: 25px; }
+            95% { left: 150px; top: -30px; width: 30px; height: 30px; }
+            98% { left: 150px; top: -30px; }
+            100% { left: 150px; top: 0; }
+        }
+        .model-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+            display: none;
+        }
+
+        #aiPetBtn {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .hero {
+            position: relative;
+            z-index: 10;
+        }
+        .behind {
+            z-index: 15;
+        }
+
+        /* ========== 新增：四张卡片样式 ========== */
+        .core {
+            position: relative;
+            z-index: 10001;
+            background: linear-gradient(to bottom, #0a0e12, #12161c);
+            min-height: 100vh;
+            padding: 100px 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cards-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .floating-card {
+            width: 260px;
+            background: rgba(25, 30, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            border: 1px solid rgba(212, 184, 122, 0.4);
+            padding: 28px 20px 24px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.4, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(80px);
+        }
+
+        .floating-card.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .floating-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: #d4b87a;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        .floating-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 184, 122, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .floating-card:hover::before {
+            left: 100%;
+        }
+
+        .card-emoji-lg {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
+        .floating-card h4 {
+            font-size: 1.3rem;
+            color: #d4b87a;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        .floating-card .card-desc {
+            font-size: 0.75rem;
+            color: #c8c2b0;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .card-divider {
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, #d4b87a, transparent);
+            margin: 14px auto;
+        }
+
+        .floating-card::after {
+            content: "❦";
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 0.7rem;
+            color: rgba(212, 184, 122, 0.3);
+        }
+
+        @media (max-width: 1100px) {
+            .cards-row { gap: 20px; }
+            .floating-card { width: 220px; padding: 20px 15px; }
+            .floating-card h4 { font-size: 1.1rem; }
+            .card-emoji-lg { font-size: 2.8rem; }
+        }
+
+        @media (max-width: 900px) {
+            .cards-row { flex-direction: column; align-items: center; }
+            .floating-card { width: 280px; }
+            .core { padding: 60px 20px; }
+        }
+                /* ========== turn-right 滚动区域样式 ========== */
+        .turn-right {
+            position: relative;
+            width: 100%;
+            min-height: 400px;
+            background: linear-gradient(135deg, #0d1117, #0a0e12);
+            overflow: hidden;
+            padding: 60px 0;
+            transition: transform 0.3s ease-out;
+        }
+
+        /* 滚动容器 - 鼠标向下滚动时向右移动 */
+        .turn-right.scroll-move {
+            transform: translateX(0px);
+        }
+
+        /* 指标卡片滚动区 */
+        .metrics-scroll-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .metrics-track {
+            display: flex;
+            gap: 30px;
+            position: relative;
+            will-change: transform;
+        }
+
+        /* 单个指标卡片 - 无圆角 */
+        .metric-card {
+            flex-shrink: 0;
+            width: 220px;
+            background: rgba(20, 25, 35, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(212, 184, 122, 0.3);
+            padding: 24px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 0;
+        }
+
+        .metric-card:hover {
+            background: rgba(40, 48, 62, 0.95);
+            border-color: #d4b87a;
+            transform: translateY(-5px);
+        }
+
+        /* 环形进度条 */
+        .progress-ring {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+        }
+
+        .progress-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 6;
+            fill: none;
+        }
+
+        .progress-ring-fill {
+            stroke: #d4b87a;
+            stroke-width: 6;
+            fill: none;
+            stroke-linecap: round;
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 0.8s ease;
+        }
+
+        .progress-ring .percent-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #d4b87a;
+        }
+
+        .metric-card h4 {
+            color: #ecd9a8;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .metric-card .metric-value {
+            font-size: 0.75rem;
+            color: #a8987a;
+            margin-top: 8px;
+        }
+
+        .metric-card .metric-detail {
+            font-size: 0.7rem;
+            color: #8f846a;
+            margin-top: 10px;
+            display: none;
+            transition: all 0.2s;
+        }
+
+        .metric-card.show-detail .metric-detail {
+            display: block;
+        }
+
+        /* 标题 */
+        .turn-right-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .turn-right-title h2 {
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #f2e0b0, #cfaa73);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .turn-right-title .title-underline {
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, #d4b87a, transparent);
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .metric-card { width: 180px; padding: 18px 12px; }
+            .progress-ring { width: 70px; height: 70px; }
+            .progress-ring .percent-text { font-size: 1rem; }
+            .metric-card h4 { font-size: 0.85rem; }
+        }
+                /* ========== 底部无限滑动卡片样式 ========== */
+        .infinite-slider-container {
+            width: 100%;
+            margin-top: 80px;
+            padding: 30px 0 20px;
+            background: rgba(8, 12, 18, 0.5);
+            border-top: 1px solid rgba(212, 184, 122, 0.25);
+            border-radius: 24px;
+        }
+
+        .slider-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .slider-header h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #f2e0b0, #cfaa73);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .slider-header-line {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #d4b87a, transparent);
+            margin: 8px auto 0;
+        }
+
+        .slider-wrapper {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+        }
+
+        .slider-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .slider-track {
+            display: flex;
+            gap: 25px;
+            width: max-content;
+            transition: transform 0.05s linear;
+        }
+
+        /* 卡片样式 - 无圆角 */
+        .slider-card {
+            flex-shrink: 0;
+            width: 200px;
+            background: rgba(25, 30, 42, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(212, 184, 122, 0.35);
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+
+        .slider-card:hover {
+            background: rgba(45, 52, 70, 0.95);
+            border-color: #d4b87a;
+            transform: translateY(-5px);
+        }
+
+        /* 环形进度条 */
+        .slider-progress {
+            position: relative;
+            width: 85px;
+            height: 85px;
+            margin: 0 auto 12px;
+        }
+
+        .slider-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-bg {
+            stroke: rgba(255, 255, 255, 0.12);
+            stroke-width: 5;
+            fill: none;
+        }
+
+        .progress-fill {
+            stroke: #d4b87a;
+            stroke-width: 5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-dasharray: 213.6;
+            stroke-dashoffset: 213.6;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #d4b87a;
+        }
+
+        .slider-card h4 {
+            color: #ecd9a8;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .slider-card p {
+            font-size: 0.7rem;
+            color: #a8987a;
+            margin: 0;
+        }
+
+        .slider-detail {
+            font-size: 0.65rem;
+            color: #b8ae9a;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(212, 184, 122, 0.2);
+            display: none;
+            line-height: 1.4;
+        }
+
+        .slider-card.show-detail .slider-detail {
+            display: block;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .slider-card { width: 170px; padding: 15px 10px; }
+            .slider-progress { width: 65px; height: 65px; }
+            .progress-text { font-size: 0.9rem; }
+            .infinite-slider-container { margin-top: 50px; }
+        }
+        .core {
+    position: relative;  /* 添加这一行，作为绝对定位的参考点 */
+    z-index: 10001;
+    background: linear-gradient(to bottom, #0a0e12, #12161c);
+    min-height: 100vh;
+    padding: 100px 40px 180px 40px;  /* 底部留出空间，防止被悬浮卡片遮挡 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s ease-out;
+}
+.infinite-slider-container {
+    position: absolute;   /* 改为绝对定位 */
+    bottom: 40px;         /* 距离 .core 底部40px */
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 20px 0;
+    background: rgba(8, 12, 18, 0.6);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(212, 184, 122, 0.3);
+    border-bottom: 1px solid rgba(212, 184, 122, 0.3);
+    border-radius: 0;
+}
+/* 修改 .core - 添加 position: relative */
+.core {
+    position: relative;      /* 新增 */
+    z-index: 10001;
+    background: linear-gradient(to bottom, #0a0e12, #12161c);
+    min-height: 120vh;
+    padding: 40px 40px 240px 40px;  /* 底部留空间，避免遮挡 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s ease-out;
+}
+
+/* 修改 .infinite-slider-container - 改为绝对定位 */
+.infinite-slider-container {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 10px 0;
+    background: rgba(8, 12, 18, 0.6);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(212, 184, 122, 0.3);
+    border-bottom: 1px solid rgba(212, 184, 122, 0.3);
+}
+
+/* 其余样式保持不变 */
+.slider-wrapper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.slider-track {
+    display: flex;
+    gap: 25px;
+    width: max-content;
+}
+
+.slider-card {
+    flex-shrink: 0;
+    width: 200px;
+    background: rgba(25, 30, 42, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(212, 184, 122, 0.35);
+    padding: 20px 15px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 0;
+    transition: all 0.3s ease;
+}
+
+.slider-card:hover {
+    background: rgba(45, 52, 70, 0.95);
+    border-color: #d4b87a;
+    transform: translateY(-5px);
+}
+
+/* 环形进度条样式 */
+.slider-progress {
+    position: relative;
+    width: 85px;
+    height: 85px;
+    margin: 0 auto 12px;
+}
+
+.slider-progress svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.progress-bg {
+    stroke: rgba(255, 255, 255, 0.12);
+    stroke-width: 5;
+    fill: none;
+}
+
+.progress-fill {
+    stroke: #d4b87a;
+    stroke-width: 5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-dasharray: 213.6;
+    stroke-dashoffset: 213.6;
+    transition: stroke-dashoffset 0.6s ease;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    font-weight: bold;
+    color: #d4b87a;
+}
+
+.slider-card h4 {
+    color: #ecd9a8;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.slider-card p {
+    font-size: 0.7rem;
+    color: #a8987a;
+}
+
+.slider-detail {
+    font-size: 0.65rem;
+    color: #b8ae9a;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(212, 184, 122, 0.2);
+    display: none;
+}
+
+.slider-card.show-detail .slider-detail {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .slider-card { width: 170px; padding: 15px 10px; }
+    .slider-progress { width: 65px; height: 65px; }
+    .core { padding: 60px 20px 160px 20px; }
+}
+        /* ========== 卷轴式悬浮导航 ========== */
+        .scroll-nav {
+            position: fixed;
+            left: 0;
+            top: 30%;
+            transform: translateY(-50%);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+        }
+
+        .scroll-tab {
+            width: 32px;
+            height: 48px;
+            background: linear-gradient(135deg, #c9a96e, #a88848);
+            border-radius: 0 16px 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            border-right: 1px solid rgba(255,215,150,0.4);
+        }
+
+        .scroll-tab:hover {
+            width: 38px;
+            background: linear-gradient(135deg, #dbbc7e, #b89858);
+        }
+
+        .scroll-menu {
+            background: rgba(20, 25, 40, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 0 12px 12px 0;
+            padding: 8px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 4px 4px 15px rgba(0,0,0,0.3);
+            border-left: 2px solid #c9a96e;
+        }
+
+        .scroll-nav:hover .scroll-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .scroll-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            text-decoration: none;
+            font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-item:hover {
+            background: rgba(201, 169, 110, 0.2);
+            padding-left: 24px;
+        }
+
+        .scroll-icon {
+            font-size: 15px;
+            color: #d4b87a;
+        }
+
+        .scroll-title {
+            font-size: 14px;
+            color: #e8d8b0;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .scroll-desc {
+            font-size: 11px;
+            color: #b8a87a;
+            margin-left: 6px;
+        }
+
+        .scroll-line {
+            width: 85%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #c9a96e, #d4b87a, #c9a96e, transparent);
+            margin: 4px auto;
+        }
+
+        @media (max-width: 768px) {
+            .scroll-tab {
+                width: 28px;
+                height: 40px;
+                font-size: 16px;
+            }
+            .scroll-item {
+                padding: 8px 14px;
+            }
+            .scroll-title {
+                font-size: 12px;
+            }
+            .scroll-desc {
+                font-size: 9px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== 导航栏 ========== -->
+    <nav>
+        <div class="left">
+            <div class="touxiang" id="avatarContainer">
+                <img src="./images/image.png" alt="logo" id="avatarImg" 
+                     onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div class=\'fallback-icon\'>🌉</div>';">
+            </div>
+            <span>洛阳桥</span>
+            <span>古桥遗韵</span>
+
+            <div class="avatar-dropdown" id="avatarDropdown">
+                <div class="dropdown-title">选择化身</div>
+                <div class="avatar-options" id="avatarOptions">
+                    <div class="avatar-option" data-emoji="🌉">🌉</div>
+                    <div class="avatar-option" data-emoji="🏛️">🏛️</div>
+                    <div class="avatar-option" data-emoji="🐉">🐉</div>
+                    <div class="avatar-option" data-emoji="🦁">🦁</div>
+                    <div class="avatar-option" data-emoji="🌸">🌸</div>
+                    <div class="avatar-option" data-emoji="🏯">🏯</div>
+                    <div class="avatar-option" data-emoji="⛩️">⛩️</div>
+                    <div class="avatar-option" data-emoji="🎋">🎋</div>
+                    <div class="avatar-option" data-emoji="🌊">🌊</div>
+                    <div class="avatar-option" data-emoji="🏔️">🏔️</div>
+                    <div class="avatar-option" data-emoji="🌙">🌙</div>
+                    <div class="avatar-option" data-emoji="⭐">⭐</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pet-icon" id="aiPetBtn" title="AI桥梁助手">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <style>
+                        @keyframes blinkUpLeft { 0%,85%,100% { transform: translateY(0); } 90%,95% { transform: translateY(-10px); } }
+                        @keyframes blinkUpRight { 0%,85%,100% { transform: translateY(0); } 90%,95% { transform: translateY(-10px); } }
+                        @keyframes wagTail { 0%,100% { transform: rotate(-10deg); transform-origin: 85% 85%; } 50% { transform: rotate(12deg); transform-origin: 85% 85%; } }
+                        .eyelid-left { animation: blinkUpLeft 3.5s infinite ease-in-out; }
+                        .eyelid-right { animation: blinkUpRight 3.5s infinite ease-in-out; }
+                        .tail-group { animation: wagTail 1.2s infinite ease-in-out; }
+                    </style>
+                </defs>
+                <circle cx="50" cy="55" r="40" fill="#FF7043"/>
+                <ellipse cx="50" cy="65" rx="22" ry="18" fill="#FFAB91"/>
+                <circle cx="35" cy="50" r="6" fill="white"/>
+                <circle cx="35" cy="50" r="3" fill="#3E2723"/>
+                <circle cx="33" cy="48" r="1.5" fill="white"/>
+                <rect class="eyelid-left" x="29" y="50" width="12" height="6" rx="3" fill="#FF7043"/>
+                <circle cx="65" cy="50" r="6" fill="white"/>
+                <circle cx="65" cy="50" r="3" fill="#3E2723"/>
+                <circle cx="63" cy="48" r="1.5" fill="white"/>
+                <rect class="eyelid-right" x="59" y="50" width="12" height="6" rx="3" fill="#FF7043"/>
+                <path d="M28 28 L22 10 L36 24 Z" fill="#BF360C"/>
+                <path d="M72 28 L78 10 L64 24 Z" fill="#BF360C"/>
+                <circle cx="28" cy="60" r="5" fill="#FF3D00" opacity="0.4"/>
+                <circle cx="72" cy="60" r="5" fill="#FF3D00" opacity="0.4"/>
+                <path d="M42 70 Q50 78 58 70" stroke="#BF360C" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <g class="tail-group">
+                    <path d="M50 95 Q40 108 55 112 Q48 105 50 95" fill="#FF9800" stroke="#E65100" stroke-width="1.5"/>
+                    <path d="M55 112 Q62 115 58 108" fill="#FF9800" stroke="#E65100" stroke-width="1.5"/>
+                </g>
+                <text x="50" y="30" text-anchor="middle" font-size="10px" fill="#FFD54F" font-weight="bold">🔥</text>
+            </svg>
+        </div>
+    </nav>
+
+    <div id="aiChatWindow" class="ai-chat-window">
+        <iframe src="./agent.html"></iframe>
+    </div>
+
+    <!-- hero 区域 -->
+    <div class="hero">
+        <h1>洛阳桥 · 海内第一桥</h1>
+        <div class="subtitle-line">筏形基础 · 种蛎固基 · 浮运架梁</div>
+        <div class="divider-line"></div>
+        <div class="sub-footer">LUOYANG BRIDGE | 宋元泉州世界遗产</div>
+        
+        <div class="behind">
+            <div class="circle">
+                <div class="ring1"></div>
+                <div class="ring2"></div>
+                <div class="text-container-left">
+                    <div class="title-left">★ 基本信息 ★</div>
+                    <div class="item-left">● 全称：万安桥（洛阳桥）</div>
+                    <div class="item-left">● 区位：福建泉州洛阳江入海口</div>
+                    <div class="item-left">● 建造：北宋1053-1059年，蔡襄主持</div>
+                    <div class="item-left">● 历时：六年竣工</div>
+                    <div class="item-left">● 地位：中国最早跨海梁式石桥</div>
+                    <div class="item-left">● 荣誉：世界文化遗产核心点</div>
+                    <div class="item-left">● 形制：石构梁式桥，跨海通衢</div>
+                </div>
+            </div>
+            <div class="circle">
+                <div class="ring1"></div>
+                <div class="ring2"></div>
+                <div class="text-container-right">
+                    <div class="title-right">★ 核心成就 ★</div>
+                    <div class="item-right">● 中国四大古桥之一</div>
+                    <div class="item-right">● 全国重点文物保护单位</div>
+                    <div class="item-right">● 古代海洋建桥巅峰之作</div>
+                    <div class="item-right">● 海丝文化重要地标</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin: 20px 0 10px 0;">
+        <button id="triggerBridgeBtn" style="background: #d4b87a; color: #1a1a1a; border: none; padding: 8px 28px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-size: 14px;">◉ 展开桥景 ◉</button>
+    </div>
+
+    <!-- 桥景 + 视频区域 -->
+    <div class="bridge-stage" id="bridgeStage">
+        <div class="iframe-container" id="iframeContainer">
+            <iframe src="./bridge-animation.html" id="bridgeIframe" width="100%" height="580" frameborder="0" scrolling="no" style="display: block; background: transparent;"></iframe>
+            <div id="curtainWrapper" class="curtain-wrapper">
+                <div class="curtain">
+                    <div class="video-player-container">
+                        <div class="video-wrapper">
+                            <video id="curtainVideo" muted loop preload="auto" playsinline>
+                                <source src="./video/bridge-video.mp4" type="video/mp4">
+                                您的浏览器不支持视频播放。
+                            </video>
+                            <div class="player-controls-overlay">
+                                <div class="ctrl-group">
+                                    <button class="ctrl-btn" id="playPauseBtn">▶</button>
+                                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.8" title="音量">
+                                    <button class="ctrl-btn" id="resetVideoBtn">↺</button>
+                                </div>
+                                <div class="progress-area">
+                                    <span class="time-current" id="currentTimeDisplay">0:00</span>
+                                    <div class="progress-bar" id="progressBarArea">
+                                        <div class="progress-fill" id="progressFillBar"></div>
+                                        <div class="progress-handle" id="progressHandle"></div>
+                                    </div>
+                                    <span class="time-duration" id="durationDisplay">0:00</span>
+                                </div>
+                                <div class="ctrl-group">
+                                    <select id="speedSelect" class="speed-select">
+                                        <option value="0.5">0.5x</option>
+                                        <option value="0.75">0.75x</option>
+                                        <option value="1" selected>1x</option>
+                                        <option value="1.25">1.25x</option>
+                                        <option value="1.5">1.5x</option>
+                                        <option value="2">2x</option>
+                                    </select>
+                                    <button class="ctrl-btn" id="fullscreenVideoBtn">⛶</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slider-container">
+        <span class="slider-label">◀ 收起</span>
+        <input type="range" id="curtainSlider" class="curtain-slider" min="0" max="100" value="0">
+        <span class="slider-value" id="sliderValue">0%</span>
+        <span class="slider-label">展开 ▶</span>
+    </div>
+
+    <!-- ========== 卡片横向滚动区域 ========== -->
+    <div class="cards-wrapper" id="cardsWrapper">
+        <div class="cards-tip">
+            <div class="tip-btn" id="tipBtn">
+                <span class="tip-icon">✨</span>
+                <span>点击卡片翻转查看图片</span>
+                <span class="tip-arrow">→</span>
+            </div>
+        </div>
+
+        <div class="cards-container">
+            <div class="cards-track" id="cardsTrack">
+                <div class="card"><div class="flipper"><div class="front"><div class="card-emoji">🌉</div><h3>筏形基础</h3><p>船形桥基分水破浪，世界首创生物学与工程学结合，千年稳固。</p><div class="card-tag">#北宋·蔡襄</div></div><div class="back"><img src="./images/faxingjichu.png" alt="筏形基础"><div class="back-caption">🌊 筏形基础 · 分水破浪</div></div></div></div>
+                <div class="card"><div class="flipper"><div class="front"><div class="card-emoji">🐚</div><h3>种蛎固基</h3><p>利用牡蛎加固桥基，全球首个生物工程技术应用，至今坚固。</p><div class="card-tag">#生物工程鼻祖</div></div><div class="back"><img src="./images/zhongliguji.png" alt="种蛎固基"><div class="back-caption">🐚 种蛎固基 · 牡蛎护桥</div></div></div></div>
+                <div class="card"><div class="flipper"><div class="front"><div class="card-emoji">🚢</div><h3>浮运架梁</h3><p>借潮汐之力架设石梁，巧妙利用自然，展现古人智慧。</p><div class="card-tag">#潮汐力学</div></div><div class="back"><img src="./images/fuyunjialiang.png" alt="浮运架梁"><div class="back-caption">🚢 浮运架梁 · 潮汐之力</div></div></div></div>
+                <div class="card"><div class="flipper"><div class="front"><div class="card-emoji">📜</div><h3>万安桥记</h3><p>蔡襄亲撰"三绝碑"，文、书、刻俱佳，文化遗产瑰宝。</p><div class="card-tag">#文化遗产</div></div><div class="back"><img src="./images/beiketuoyin.png" alt="万安桥记"><div class="back-caption">📜 万安桥记 · 三绝碑</div></div></div></div>
+                <div class="card"><div class="flipper"><div class="front"><div class="card-emoji">🐉</div><h3>石雕望柱</h3><p>石狮、石象望柱，宋代石雕艺术巅峰，历经风雨威严。</p><div class="card-tag">#宋代石雕</div></div><div class="back"><img src="./images/shishidiaoke.png" alt="石雕望柱"><div class="back-caption">🐉 石雕望柱 · 千年守护</div></div></div></div>
+                <div class="card"><div class="flipper"><div class="front"><div class="card-emoji">🌊</div><h3>海内第一桥</h3><p>中国最早跨海石桥，世界文化遗产核心点，泉州骄傲。</p><div class="card-tag">#世界遗产</div></div><div class="back"><img src="./images/quanjingtu.png" alt="海内第一桥"><div class="back-caption">🌊 海内第一桥 · 千年洛阳</div></div></div></div>
+                <div class="card"><div class="flipper"><div class="front"><div class="card-emoji">🏮</div><h3>桥南古街</h3><p>桥畔千年古街，海丝商贸见证，人间烟火不息。</p><div class="card-tag">#海丝记忆</div></div><div class="back"><img src="./images/qiaonangujie.webp" alt="桥南古街"><div class="back-caption">🏮 桥南古街 · 烟火千年</div></div></div></div>
+            </div>
+            <div class="cards-nav" id="cardsNav"></div>
+            <div class="cards-counter" id="cardsCounter"></div>
+        </div>
+    </div>
+
+    <div style="height: 600px; background: linear-gradient(to bottom, #5350905c, #ffffff94);"></div>
+
+    <!-- ========== 雾气覆盖层（时间轴 + 美化表格 + 蒙版图片） ========== -->
+    <div class="mist-overlay-container" id="mistOverlayContainer">
+        <div class="mist-overlay" id="mistOverlay">
+            <div class="mist-layout">
+                <!-- 左侧：时间轴 -->
+                <div class="timeline-wrapper" id="timelineWrapper">
+                    <div class="timeline-item" data-index="0">
+                        <div class="timeline-header">
+                            <span class="timeline-icon">创</span>
+                            <span class="timeline-year">1053-1059</span>
+                        </div>
+                        <div class="timeline-dynasty">北宋 · 皇祐年间</div>
+                        <div class="timeline-era">🏗️ 创新诞生期</div>
+                        <div class="timeline-desc">蔡襄主持建造，立《万安桥记》碑。首创「筏形基础、种蛎固基、浮运架梁」四大技术。</div>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">筏形基础</span>
+                            <span class="timeline-tag">种蛎固基</span>
+                            <span class="timeline-tag">浮运架梁</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-index="1">
+                        <div class="timeline-header">
+                            <span class="timeline-icon">修</span>
+                            <span class="timeline-year">1138</span>
+                        </div>
+                        <div class="timeline-dynasty">南宋 · 绍兴年间</div>
+                        <div class="timeline-era">🔧 首次大修期</div>
+                        <div class="timeline-desc">飓风损毁桥墩，知州赵思诚主持修复。100%保留宋代原构，首次灾后重建。</div>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">宋代原构</span>
+                            <span class="timeline-tag">灾后重建</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-index="2">
+                        <div class="timeline-header">
+                            <span class="timeline-icon">传</span>
+                            <span class="timeline-year">元-清</span>
+                        </div>
+                        <div class="timeline-dynasty">元 · 明 · 清</div>
+                        <div class="timeline-era">📜 延续修缮期</div>
+                        <div class="timeline-desc">16次灾害后修复，增建石狮石塔。种蛎固基工艺延续，艺术装饰完善。</div>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">石狮石塔</span>
+                            <span class="timeline-tag">艺术装饰</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-index="3">
+                        <div class="timeline-header">
+                            <span class="timeline-icon">殇</span>
+                            <span class="timeline-year">1938</span>
+                        </div>
+                        <div class="timeline-dynasty">民国 · 抗战时期</div>
+                        <div class="timeline-era">💔 战时损毁期</div>
+                        <div class="timeline-desc">抗战炸桥断交通，战后简易修复。主体结构保存完整，桥墩受损。</div>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">战火洗礼</span>
+                            <span class="timeline-tag">主体完整</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-index="4">
+                        <div class="timeline-header">
+                            <span class="timeline-icon">荣</span>
+                            <span class="timeline-year">1993-至今</span>
+                        </div>
+                        <div class="timeline-dynasty">近现代 · 当代</div>
+                        <div class="timeline-era">🏛️ 活态保护期</div>
+                        <div class="timeline-desc">文物大修工程，现代科学监测保护。<br><strong style="color:#ffcc66;">★ 2021年世界遗产列入 ★</strong><br>宋元泉州世界遗产核心点。</div>
+                        <div class="timeline-tags">
+                            <span class="timeline-tag">世界遗产</span>
+                            <span class="timeline-tag">科学监测</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 中间：美化的千年功能演变表格 -->
+                <div class="table-wrapper" id="tableWrapper">
+                    <div class="table-title">📊 千年功能演变</div>
+                    <table class="function-table">
+                        <thead>
+                            <tr>
+                                <th>功能</th>
+                                <th>北宋</th>
+                                <th>明清</th>
+                                <th>当代</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>交通</td>
+                                <td>核心枢纽</td>
+                                <td>持续通行</td>
+                                <td>文旅专用</td>
+                            </tr>
+                            <tr>
+                                <td>商贸</td>
+                                <td>海丝节点</td>
+                                <td>民间通道</td>
+                                <td>世遗载体</td>
+                            </tr>
+                            <tr>
+                                <td>文化</td>
+                                <td>城市标志</td>
+                                <td>文人打卡</td>
+                                <td>世界遗产</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="table-footer-note">✧ 千年风雨 · 石桥不朽 ✧</div>
+                </div>
+
+                <!-- 右侧：蒙版图片 -->
+                <img src="./images/senery-bridge.png" alt="洛阳桥" class="mist-mask-image" id="maskImage">
+            </div>
+
+            <div class="mist-particles"></div>
+            <div class="mist-waves">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 120" preserveAspectRatio="none">
+                    <defs>
+                        <path id="mistWavePath" d="M0,64 C80,100 140,20 240,30 C340,40 400,100 500,60 C600,20 700,80 800,40 L800,120 L0,120 Z" />
+                    </defs>
+                    <use href="#mistWavePath" x="0" y="0" fill="rgba(80, 85, 95, 0.4)" class="mist-parallax" />
+                    <use href="#mistWavePath" x="0" y="8" fill="rgba(60, 65, 75, 0.3)" class="mist-parallax" />
+                    <use href="#mistWavePath" x="0" y="16" fill="rgba(40, 45, 55, 0.2)" class="mist-parallax" />
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="mist-info" id="mistInfo">🌫️ 雾气弥漫: 0%</div>
+
+    <!-- ========== 四张卡片区域 ========== -->
+        <!-- ========== 四张卡片区域 ========== -->
+        <!-- ========== core 核心区域 ========== -->
+        <!-- ========== 四张卡片区域 ========== -->
+        <!-- ========== core 核心区域（四张卡片 + 底部无限滑动卡片） ========== -->
+    <div class="core">
+        <!-- 标题写在卡片上方 -->
+        <div class="cards-title-wrap">
+            <h2 class="core-title">建筑匠心与保护价值</h2>
+            <div class="title-underline"></div>
+        </div>
+        
+        <!-- 四张卡片横向排布 -->
+        <div class="cards-row">
+            <div class="floating-card" data-delay="0">
+                <div class="card-emoji-lg">⚙️</div>
+                <h4>力学工艺</h4>
+                <div class="card-divider"></div>
+                <div class="card-desc">无黏合剂条石干砌，重力咬合+应力分散，抗台风抗震</div>
+            </div>
+            <div class="floating-card" data-delay="1">
+                <div class="card-emoji-lg">🌊</div>
+                <h4>海洋智慧</h4>
+                <div class="card-divider"></div>
+                <div class="card-desc">利用潮汐涨落运输巨石，首创生物加固技术</div>
+            </div>
+            <div class="floating-card" data-delay="2">
+                <div class="card-emoji-lg">🛡️</div>
+                <h4>三重防护</h4>
+                <div class="card-divider"></div>
+                <div class="card-desc">桥墩潮汐分流、牡蛎生物加固、现代结构监测</div>
+            </div>
+            <div class="floating-card" data-delay="3">
+                <div class="card-emoji-lg">🏆</div>
+                <h4>世界价值</h4>
+                <div class="card-divider"></div>
+                <div class="card-desc">古代海洋工程奇迹，中国四大古桥，泉州世遗核心载体</div>
+            </div>
+        </div>
+
+        <!-- ========== 底部无限滑动卡片区域 ========== -->
+        <div class="infinite-slider-container">
+            <div class="slider-header">
+                <h3>📊 桥梁核心指标</h3>
+                <div class="slider-header-line"></div>
+            </div>
+            <div class="slider-wrapper" id="sliderWrapper">
+                <div class="slider-track" id="sliderTrack">
+                    <!-- 卡片1 -->
+                    <div class="slider-card" data-percent="61" data-name="保存率" data-value="61%" data-detail="石构件原址保存率，宋代原石占比61%，世界遗产保护标准达标率92%">
+                        <div class="slider-progress">
+                            <svg viewBox="0 0 80 80">
+                                <circle class="progress-bg" cx="40" cy="40" r="34"></circle>
+                                <circle class="progress-fill" cx="40" cy="40" r="34"></circle>
+                            </svg>
+                            <span class="progress-text">61%</span>
+                        </div>
+                        <h4>保存率</h4>
+                        <p>原址保存率</p>
+                        <div class="slider-detail"></div>
+                    </div>
+                    <!-- 卡片2 -->
+                    <div class="slider-card" data-percent="90" data-name="桥梁全长" data-value="731m" data-detail="原桥长731米，现存桥长731米，保存完整度90%">
+                        <div class="slider-progress">
+                            <svg viewBox="0 0 80 80">
+                                <circle class="progress-bg" cx="40" cy="40" r="34"></circle>
+                                <circle class="progress-fill" cx="40" cy="40" r="34"></circle>
+                            </svg>
+                            <span class="progress-text">90%</span>
+                        </div>
+                        <h4>桥梁全长</h4>
+                        <p>731米 / 保存度</p>
+                        <div class="slider-detail"></div>
+                    </div>
+                    <!-- 卡片3 -->
+                    <div class="slider-card" data-percent="98" data-name="桥梁宽度" data-value="7m" data-detail="桥面宽7米，宋代原构宽度保存98%">
+                        <div class="slider-progress">
+                            <svg viewBox="0 0 80 80">
+                                <circle class="progress-bg" cx="40" cy="40" r="34"></circle>
+                                <circle class="progress-fill" cx="40" cy="40" r="34"></circle>
+                            </svg>
+                            <span class="progress-text">98%</span>
+                        </div>
+                        <h4>桥梁宽度</h4>
+                        <p>7米 / 保存度</p>
+                        <div class="slider-detail"></div>
+                    </div>
+                    <!-- 卡片4 -->
+                    <div class="slider-card" data-percent="100" data-name="桥墩数量" data-value="46座" data-detail="现存桥墩46座，宋代原构桥墩46座，保存率100%">
+                        <div class="slider-progress">
+                            <svg viewBox="0 0 80 80">
+                                <circle class="progress-bg" cx="40" cy="40" r="34"></circle>
+                                <circle class="progress-fill" cx="40" cy="40" r="34"></circle>
+                            </svg>
+                            <span class="progress-text">100%</span>
+                        </div>
+                        <h4>桥墩数量</h4>
+                        <p>46座 / 保存率</p>
+                        <div class="slider-detail"></div>
+                    </div>
+                    <!-- 卡片5 -->
+                    <div class="slider-card" data-percent="69" data-name="石梁规格" data-value="11m×0.8m" data-detail="最大石梁长11米、宽0.8米，重20吨以上，原规格保存率69%">
+                        <div class="slider-progress">
+                            <svg viewBox="0 0 80 80">
+                                <circle class="progress-bg" cx="40" cy="40" r="34"></circle>
+                                <circle class="progress-fill" cx="40" cy="40" r="34"></circle>
+                            </svg>
+                            <span class="progress-text">69%</span>
+                        </div>
+                        <h4>石梁规格</h4>
+                        <p>11m×0.8m / 保存度</p>
+                        <div class="slider-detail"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 宠物副本 -->
+    <div id="petClone" style="position: fixed; right: 48px; top: 12px; width: 42px; height: 42px; z-index: 999999; cursor: pointer;">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <defs>
+                <style>
+                    @keyframes blinkUpLeftClone { 0%,85%,100% { transform: translateY(0); } 90%,95% { transform: translateY(-10px); } }
+                    @keyframes blinkUpRightClone { 0%,85%,100% { transform: translateY(0); } 90%,95% { transform: translateY(-10px); } }
+                    @keyframes wagTailClone { 0%,100% { transform: rotate(-10deg); transform-origin: 85% 85%; } 50% { transform: rotate(15deg); transform-origin: 85% 85%; } }
+                    .eyelid-left-clone { animation: blinkUpLeftClone 3.5s infinite ease-in-out; }
+                    .eyelid-right-clone { animation: blinkUpRightClone 3.5s infinite ease-in-out; }
+                    .tail-group-clone { animation: wagTailClone 1.2s infinite ease-in-out; }
+                </style>
+            </defs>
+            <circle cx="50" cy="55" r="40" fill="#FF7043"/>
+            <ellipse cx="50" cy="65" rx="22" ry="18" fill="#FFAB91"/>
+            <circle cx="35" cy="50" r="6" fill="white"/>
+            <circle cx="35" cy="50" r="3" fill="#3E2723"/>
+            <circle cx="33" cy="48" r="1.5" fill="white"/>
+            <rect class="eyelid-left-clone" x="29" y="50" width="12" height="6" rx="3" fill="#FF7043"/>
+            <circle cx="65" cy="50" r="6" fill="white"/>
+            <circle cx="65" cy="50" r="3" fill="#3E2723"/>
+            <circle cx="63" cy="48" r="1.5" fill="white"/>
+            <rect class="eyelid-right-clone" x="59" y="50" width="12" height="6" rx="3" fill="#FF7043"/>
+            <path d="M28 28 L22 10 L36 24 Z" fill="#BF360C"/>
+            <path d="M72 28 L78 10 L64 24 Z" fill="#BF360C"/>
+            <circle cx="28" cy="60" r="5" fill="#FF3D00" opacity="0.4"/>
+            <circle cx="72" cy="60" r="5" fill="#FF3D00" opacity="0.4"/>
+            <path d="M42 70 Q50 78 58 70" stroke="#BF360C" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <g class="tail-group-clone">
+                <path d="M50 95 Q40 108 55 112 Q48 105 50 95" fill="#FF9800" stroke="#E65100" stroke-width="1.5"/>
+                <path d="M55 112 Q62 115 58 108" fill="#FF9800" stroke="#E65100" stroke-width="1.5"/>
+            </g>
+            <text x="50" y="30" text-anchor="middle" font-size="16" fill="#FFD54F" font-weight="bold">🔥</text>
+        </svg>
+    </div>
+
+    <!-- 3D建模卡片 -->
+    <div class="model-card">
+        <h3>🌐 洛阳桥 3D 建模</h3>
+        <p>点击进入全景3D浏览模式</p>
+        <button class="model-btn" id="openModelBtn">进入 3D 建模</button>
+    </div>
+
+    <div id="modelPage">
+        <iframe class="model-iframe" id="modelIframe" src=""></iframe>
+        <div id="modelLoading">
+            <div class="loader">
+                <div style="--i:0;"></div>
+                <div style="--i:1;"></div>
+                <div style="--i:2;"></div>
+                <div style="--i:3;"></div>
+                <div style="--i:4;"></div>
+                <div style="--i:5;"></div>
+            </div>
+        </div>
+        <button class="close-btn" id="closeModelBtn">✕ 关闭返回</button>
+    </div>
+
+    <script src="./js/index.js"></script>
+    <script>
+        // ========== 四张卡片滚动动画（有时间差地向上移动）- 修正版 ==========
+        (function() {
+            const coreSection = document.querySelector('.core');
+            const cards = document.querySelectorAll('.floating-card');
+            
+            if (!coreSection || cards.length === 0) {
+                console.log('卡片动画：未找到 .core 或卡片元素，共找到', cards.length, '张卡片');
+                return;
+            }
+            
+            console.log('🎴 卡片动画已初始化，共', cards.length, '张卡片');
+            
+            let animationTriggered = false;
+            
+            function triggerAnimation() {
+                if (animationTriggered) return;
+                animationTriggered = true;
+                console.log('🎴 卡片动画已触发！');
+                
+                cards.forEach((card, index) => {
+                    const delay = index * 180; // 0ms, 180ms, 360ms, 540ms 依次出现
+                    setTimeout(() => {
+                        card.classList.add('animate-in');
+                        console.log(`✅ 卡片${index+1} (${card.querySelector('h4')?.innerText || ''}) 动画已添加`);
+                    }, delay);
+                });
+            }
+            
+            function checkAndAnimate() {
+                if (animationTriggered) return;
+                
+                const rect = coreSection.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                const scrollY = window.scrollY;
+                
+                // 条件1：core 区域顶部进入视口
+                const isTopVisible = rect.top < windowHeight - 80;
+                // 条件2：页面滚动超过 core 区域位置
+                const isScrolledPast = scrollY + windowHeight > coreSection.offsetTop + 100;
+                
+                if (isTopVisible || isScrolledPast) {
+                    triggerAnimation();
+                }
+            }
+            
+            // 监听滚动
+            window.addEventListener('scroll', () => {
+                requestAnimationFrame(checkAndAnimate);
+            });
+            
+            // 页面加载后多次检查（确保触发）
+            window.addEventListener('load', () => {
+                setTimeout(checkAndAnimate, 300);
+                setTimeout(checkAndAnimate, 1000);
+            });
+            
+            // 立即检查一次
+            checkAndAnimate();
+            
+            // 额外：如果用户已经滚动过了，延迟再检查一次
+            setTimeout(checkAndAnimate, 1500);
+        })();
+                // ========== 底部无限滑动卡片（鼠标悬停停止，离开继续） ==========
+        (function() {
+            const track = document.getElementById('sliderTrack');
+            const wrapper = document.querySelector('.slider-wrapper');
+            if (!track || !wrapper) return;
+
+            // 克隆一组卡片实现无缝循环
+            const originalCards = Array.from(document.querySelectorAll('.slider-card'));
+            originalCards.forEach(card => {
+                const clone = card.cloneNode(true);
+                track.appendChild(clone);
+            });
+
+            // 初始化所有卡片的进度条和点击事件
+            function initCard(card) {
+                const percent = parseInt(card.getAttribute('data-percent'));
+                const circumference = 213.6;
+                const offset = circumference - (percent / 100) * circumference;
+                const fillCircle = card.querySelector('.progress-fill');
+                if (fillCircle) {
+                    fillCircle.style.strokeDashoffset = offset;
+                }
+
+                const name = card.getAttribute('data-name');
+                const value = card.getAttribute('data-value');
+                const detail = card.getAttribute('data-detail');
+
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = card.classList.contains('show-detail');
+                    // 关闭其他所有卡片的详情
+                    document.querySelectorAll('.slider-card').forEach(c => c.classList.remove('show-detail'));
+                    if (!isOpen) {
+                        card.classList.add('show-detail');
+                        const detailDiv = card.querySelector('.slider-detail');
+                        if (detailDiv) {
+                            detailDiv.innerHTML = `<span style="color:#d4b87a;">📌 ${name}: ${value}</span><br>${detail}`;
+                        }
+                    }
+                });
+            }
+
+            document.querySelectorAll('.slider-card').forEach(initCard);
+
+            // 获取所有卡片（包括克隆）
+            const allCards = document.querySelectorAll('.slider-card');
+            const cardWidth = 200 + 25; // 宽度 + gap
+            let position = 0;
+            let animationId = null;
+            let isHovering = false;
+            let speed = 0.8; // 移动速度（像素/帧）
+
+            // 鼠标悬停停止
+            wrapper.addEventListener('mouseenter', () => {
+                isHovering = true;
+            });
+            wrapper.addEventListener('mouseleave', () => {
+                isHovering = false;
+            });
+
+            function animateSlider() {
+                if (!isHovering) {
+                    position -= speed;
+                    // 无缝循环：当移动超过一组卡片的宽度时重置
+                    if (Math.abs(position) >= cardWidth * originalCards.length) {
+                        position = 0;
+                    }
+                    track.style.transform = `translateX(${position}px)`;
+                }
+                animationId = requestAnimationFrame(animateSlider);
+            }
+
+            animateSlider();
+
+            // 窗口大小改变时重新计算卡片宽度
+            window.addEventListener('resize', () => {
+                const newCardWidth = document.querySelector('.slider-card')?.offsetWidth || 200;
+                speed = newCardWidth / 250; // 动态调整速度
+            });
+        })();
+    </script>
+      <!-- ========== 卷轴式悬浮导航 ========== -->
+  <div class="scroll-nav">
+    <div class="scroll-tab">📜</div>
+    <div class="scroll-menu">
+      <a href="../zhao-bridge-new/index.html" class="scroll-item">
+        <span class="scroll-icon">◀</span>
+        <span class="scroll-title">赵州桥</span>
+        <span class="scroll-desc">敞肩石拱</span>
+      </a>
+      <div class="scroll-line"></div>
+      <a href="./index.html" class="scroll-item" style="cursor:default;">
+        <span class="scroll-icon">▶</span>
+        <span class="scroll-title">洛阳桥</span>
+        <span class="scroll-desc">万安古渡</span>
+      </a>
+    </div>
+  </div>
+  
+
+</body>
+</html>

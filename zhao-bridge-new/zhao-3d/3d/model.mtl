@@ -1,0 +1,18 @@
+newmtl Solid
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+d 1.0
+Ns 0.0
+illum 0
+
+newmtl ZhaozhouBridge-from-vertex
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+d 1.0
+Ns 0.0
+illum 0
+map_Kd textures/Zhaozhou_Bridge_from_vertex_88b4136872.jpg
+map_Bump textures/Zhaozhou_Bridge_from_vertex_normal_7555f7ee12.jpg
+

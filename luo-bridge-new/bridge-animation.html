@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>古桥生长动画</title>
+    <link rel="stylesheet" href="./style/bridge-animation.css">
+</head>
+<body>
+<div class="bridge-container" id="bridgeContainer">
+    <svg viewBox="0 0 1000 550" xmlns="http://www.w3.org/2000/svg" id="bridgeSvg">
+        <defs>
+            <linearGradient id="bridgeTexture" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ecd9aa" />
+                <stop offset="100%" stop-color="#b88f54" />
+            </linearGradient>
+            <linearGradient id="waterColor" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#2a5f6b" stop-opacity="0.45" />
+                <stop offset="50%" stop-color="#5d9aa3" stop-opacity="0.6" />
+                <stop offset="100%" stop-color="#2a5f6b" stop-opacity="0.45" />
+            </linearGradient>
+            <filter id="glowLine">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <!-- 所有元素初始都不可见（无 fill、无 stroke、透明） -->
+        <ellipse cx="500" cy="480" rx="450" ry="40" fill="none" />
+        
+        <!-- 桥面线条 - 初始透明，等待动画添加 -->
+        <g id="bridgeGroup"></g>
+        
+        <!-- 石板纹路和水波组 -->
+        <g id="detailGroup"></g>
+        
+        <!-- 水波组 -->
+        <g id="waveGroup"></g>
+        
+        <!-- 飞鸟组 -->
+        <g id="birdGroup"></g>
+        
+        <!-- 印章 -->
+        <rect x="50" y="520" width="40" height="40" fill="none" stroke="none" rx="4" />
+        <text x="70" y="546" font-size="16" fill="none" text-anchor="middle" font-family="'Noto Serif SC'" font-weight="bold">桥</text>
+
+        <!-- 动态图层（点击生成的曲线） -->
+        <g id="dynamicLayer"></g>
+    </svg>
+</div>
+
+<script src="./js/bridge-animation.js"></script>
+</body>
+</html>

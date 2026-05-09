@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>点击弹窗 左图右文</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{overflow:hidden;}
+canvas{display:block;}
+
+#floatTip{
+  position:absolute;
+  background:rgba(0,0,0,0.85);
+  color:#fff;
+  padding:12px;
+  border-radius:8px;
+  z-index:100;
+  display:none;
+  pointer-events:none;
+  transform:translate(-50%,-100%);
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+#floatTip .tip-img{
+  width:120px;
+  height:auto;
+  border-radius:4px;
+  object-fit:cover;
+}
+#floatTip .tip-text{
+  min-width:160px;
+}
+#floatTip .tip-text h4{
+  margin:0 0 8px;
+  font-size:16px;
+}
+#floatTip .tip-text p{
+  margin:4px 0;
+  font-size:14px;
+}
+
+/* 现实时间显示 */
+#realTime{
+  position:absolute;
+  top:16px;
+  right:20px;
+  background:rgba(0,0,0,0.6);
+  color:#fff;
+  padding:8px 12px;
+  border-radius:6px;
+  font-size:14px;
+  z-index:200;
+  pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<div id="floatTip"></div>
+<div id="realTime">0000-00-00 00:00:00</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+let scene,camera,renderer;
+const moveSpeed = 0.15;
+const mouseSensitivity = 0.004;
+let keyMap = {};
+
+let yaw = 0;
+let pitch = 0;
+const pitchLimit = Math.PI / 2.2;
+
+let isLook = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const floatTip = document.getElementById('floatTip');
+const realTimeEl = document.getElementById('realTime');
+
+let clickableObjects = [];
+let curShowObj = null;
+
+// 日夜系统（现实时间同步）
+let sunLight, ambientLight;
+let sunMesh, moonMesh;
+let particleMesh;
+
+// ====================== 发光光点材质 ======================
+let glowSpriteMaterial;
+function createGlowMaterial() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  
+  const g = ctx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0, 'rgba(255,220,80,1)');
+  g.addColorStop(0.2, 'rgba(255,160,0,0.8)');
+  g.addColorStop(0.6, 'rgba(255,100,0,0.3)');
+  g.addColorStop(1, 'rgba(255,50,0,0)');
+  
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,64,64);
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  glowSpriteMaterial = new THREE.SpriteMaterial({
+    map: tex,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+}
+
+// ====================== ✨ 星辰粒子系统 ======================
+function createStarParticles() {
+  const starCount = 2000;
+  const positions = new Float32Array(starCount * 3);
+  const sizes = new Float32Array(starCount);
+
+  for (let i = 0; i < starCount; i++) {
+    const i3 = i * 3;
+    positions[i3] = (Math.random() - 0.5) * 200;
+    positions[i3+1] = (Math.random() - 0.5) * 80;
+    positions[i3+2] = (Math.random() - 0.5) * 200;
+    sizes[i] = Math.random() * 1.2 + 0.1;
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  const material = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.8,
+    transparent: true,
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true
+  });
+
+  particleMesh = new THREE.Points(geometry, material);
+  scene.add(particleMesh);
+}
+
+function updateStars() {
+  if (particleMesh) {
+    particleMesh.rotation.y += 0.00012;
+  }
+}
+
+// ====================== 🌞 太阳 + 🌛 月亮 创建 ======================
+function createSunMoon() {
+  const sunGeo = new THREE.SphereGeometry(3, 16, 16);
+  const sunMat = new THREE.MeshBasicMaterial({ color: 0xffdd66 });
+  sunMesh = new THREE.Mesh(sunGeo, sunMat);
+  sunMesh.visible = false;
+  scene.add(sunMesh);
+
+  const moonGeo = new THREE.SphereGeometry(2.5, 16, 16);
+  const moonMat = new THREE.MeshBasicMaterial({ color: 0xf0f0f0 });
+  moonMesh = new THREE.Mesh(moonGeo, moonMat);
+  moonMesh.visible = false;
+  scene.add(moonMesh);
+}
+
+// ====================== 🕒 现实时间同步日夜 ======================
+function updateDayNightByRealTime() {
+  const now = new Date();
+  // 显示现实时间
+  const Y = now.getFullYear();
+  const M = String(now.getMonth()+1).padStart(2,'0');
+  const D = String(now.getDate()).padStart(2,'0');
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  realTimeEl.textContent = `${Y}-${M}-${D} ${h}:${m}:${s}`;
+
+  // 计算0-1的时间进度（0点=0，24点=1）
+  const hours = now.getHours() + now.getMinutes()/60 + now.getSeconds()/3600;
+  const t = hours / 24;
+
+  const radius = 60;
+  let angle = t * Math.PI * 2 - Math.PI/2; // 偏移：让12点在正上方
+
+  let bg, amb, sunI, sunC, starOpa;
+
+  // 现实时间段配色（北京时间）
+  if (hours >= 5 && hours < 8) {
+    // 清晨 5-8
+    bg = 0x8ecae6;
+    amb = 0.7;
+    sunI = 1.0;
+    sunC = 0xfff3d9;
+    starOpa = 0.2;
+    sunMesh.visible = true;
+    moonMesh.visible = false;
+  } 
+  else if (hours >= 8 && hours < 17) {
+    // 白天 8-17
+    bg = 0xb0d8ff;
+    amb = 1.1;
+    sunI = 1.4;
+    sunC = 0xffffff;
+    starOpa = 0.1;
+    sunMesh.visible = true;
+    moonMesh.visible = false;
+  } 
+  else if (hours >= 17 && hours < 20) {
+    // 傍晚 17-20
+    bg = 0xffb380;
+    amb = 0.8;
+    sunI = 1.0;
+    sunC = 0xffa060;
+    starOpa = 0.3;
+    sunMesh.visible = true;
+    moonMesh.visible = false;
+  } 
+  else {
+    // 夜晚 20-5
+    bg = 0x0a1130;
+    amb = 0.2;
+    sunI = 0.05;
+    sunC = 0x445588;
+    starOpa = 0.9;
+    sunMesh.visible = false;
+    moonMesh.visible = true;
+  }
+
+  // 应用天空/灯光
+  scene.background = new THREE.Color(bg);
+  ambientLight.intensity = amb;
+  sunLight.intensity = sunI;
+  sunLight.color.set(sunC);
+  if (particleMesh) particleMesh.material.opacity = starOpa;
+
+  // 太阳位置
+  sunMesh.position.set(
+    Math.cos(angle) * radius,
+    Math.sin(angle) * radius,
+    0
+  );
+  // 月亮在对面
+  moonMesh.position.set(
+    Math.cos(angle + Math.PI) * radius * 0.9,
+    Math.sin(angle + Math.PI) * radius * 0.9,
+    0
+  );
+
+  sunLight.position.copy(sunMesh.position);
+}
+
+// ====================== 主初始化 ======================
+function init(){
+scene = new THREE.Scene();
+
+camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,5000);
+camera.position.set(0,5,12);
+
+renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+
+// 灯光
+ambientLight = new THREE.AmbientLight(0xffffff, 1);
+scene.add(ambientLight);
+
+sunLight = new THREE.DirectionalLight(0xffffff, 1);
+scene.add(sunLight);
+
+// 太阳月亮 + 星空 + 发光点
+createSunMoon();
+createStarParticles();
+createGlowMaterial();
+
+// 可点击点位（不变）
+createClickableMarker(10.599, -0.08216, 4.8886, {
+  name: "碑刻拓片",
+  介绍: "千年古桥碑刻，历史铭文记录",
+  img: "image/图片2.png"
+});
+createClickableMarker(1.2997, -1.9306, 0.3431, {
+  name: "桥头石塔",
+  介绍: "佛教艺术与建筑融合",
+  img: "image/图片1.png"
+});
+createClickableMarker(7.4531, -0.22658, 3.8601, {
+  name: "船型桥墩",
+  介绍: "尖顶分水设计，有效抗击冲击",
+  img: "image/图片4.png"
+});
+createClickableMarker(-0.95245, -0.30848, 0.60822, {
+  name: "种蛎固基",
+  介绍: "生物胶结技术，千年不毁奇迹",
+  img: "image/图片5.png"
+});
+
+// 加载模型
+loadGLBModel();
+
+// 控制
+window.addEventListener('keydown',e=>keyMap[e.key.toLowerCase()]=true);
+window.addEventListener('keyup',e=>keyMap[e.key.toLowerCase()]=false);
+
+renderer.domElement.addEventListener('mousedown',e=>{
+  isLook = true; lastMouseX = e.clientX; lastMouseY = e.clientY;
+});
+window.addEventListener('mouseup',()=>isLook=false);
+window.addEventListener('mousemove',e=>{
+  if(!isLook) return;
+  const dx = e.clientX - lastMouseX;
+  const dy = e.clientY - lastMouseY;
+  yaw -= dx * mouseSensitivity;
+  pitch -= dy * mouseSensitivity;
+  pitch = THREE.MathUtils.clamp(pitch, -pitchLimit, pitchLimit);
+  lastMouseX = e.clientX; lastMouseY = e.clientY;
+});
+
+window.addEventListener('click', onMouseClick);
+
+window.onresize = ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+};
+
+animate();
+}
+
+// 点位
+function createClickableMarker(x,y,z,userData){
+  const sprite = new THREE.Sprite(glowSpriteMaterial);
+  sprite.position.set(x,y,z);
+  sprite.scale.set(0.8,0.8,1);
+  sprite.userData = userData;
+  scene.add(sprite);
+  clickableObjects.push(sprite);
+}
+
+function onMouseClick(event){
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(clickableObjects);
+
+  if(intersects.length > 0){
+    curShowObj = intersects[0].object;
+    buildTipHtml(curShowObj.userData);
+    floatTip.style.display = 'flex';
+  }else{
+    curShowObj = null;
+    floatTip.style.display = 'none';
+  }
+}
+
+function buildTipHtml(d){
+  let textHtml = `<h4>${d.name}</h4>`;
+  for(let k in d){
+    if(k!=='name'&&k!=='img') textHtml+=`<p>${k}：${d[k]}</p>`;
+  }
+  floatTip.innerHTML = `
+    <img class="tip-img" src="${d.img}">
+    <div class="tip-text">${textHtml}</div>
+  `;
+}
+
+function updateTipWorldPos(){
+  if(!curShowObj){ floatTip.style.display='none'; return; }
+  let wp = curShowObj.position.clone();
+  wp.y += 0.2;
+  wp.project(camera);
+  const x = (wp.x*0.5+0.5)*innerWidth;
+  const y = (-wp.y*0.5+0.5)*innerHeight;
+  floatTip.style.left = x+'px';
+  floatTip.style.top = y+'px';
+}
+
+// 加载模型
+function loadGLBModel() {
+  const loader = new GLTFLoader();
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+  loader.setDRACOLoader(dracoLoader);
+
+  loader.load('LuoyangBridge.glb', (gltf) => {
+    const model = gltf.scene;
+    model.traverse((child) => {
+      if (child.isMesh) child.material.side = THREE.DoubleSide;
+    });
+    model.scale.set(1,1,1);
+    model.position.set(0,0,0);
+    scene.add(model);
+    console.log("✅ 洛阳桥加载成功");
+  });
+}
+
+// 动画循环
+function animate(){
+  requestAnimationFrame(animate);
+
+  camera.rotation.order = 'YXZ';
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
+
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+  forward.normalize();
+  const right = new THREE.Vector3();
+  right.crossVectors(camera.up,forward).normalize();
+
+  if(keyMap['w']) camera.position.addScaledVector(forward,moveSpeed);
+  if(keyMap['s']) camera.position.addScaledVector(forward,-moveSpeed);
+  if(keyMap['a']) camera.position.addScaledVector(right,moveSpeed);
+  if(keyMap['d']) camera.position.addScaledVector(right,-moveSpeed);
+
+  // 现实时间日夜 + 星星
+  updateDayNightByRealTime();
+  updateStars();
+  updateTipWorldPos();
+
+  renderer.render(scene,camera);
+}
+
+init();
+</script>
+</body>
+</html>
