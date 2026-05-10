@@ -808,3 +808,195 @@ if (closeBtn) closeBtn.addEventListener('click', closeModel);
                 speed = newCardWidth / 250; // 动态调整速度
             });
         })();
+        // ============================================================
+// 四张卡片点击弹窗 - 洛阳桥（力学工艺、海洋智慧、三重防护、世界价值）
+// ============================================================
+(function() {
+  // 创建弹窗元素
+  let popupModal = document.getElementById('luoyangCardPopup');
+  if (!popupModal) {
+    popupModal = document.createElement('div');
+    popupModal.id = 'luoyangCardPopup';
+    popupModal.className = 'luoyang-card-popup';
+    popupModal.innerHTML = `
+      <div class="popup-overlay"></div>
+      <div class="popup-container">
+        <button class="popup-close">×</button>
+        <div class="popup-content">
+          <img class="popup-image" src="" alt="卡片详情">
+          <div class="popup-text-area">
+            <h3 class="popup-title"></h3>
+            <p class="popup-subtitle"></p>
+            <p class="popup-desc"></p>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(popupModal);
+  }
+
+  const popupOverlay = popupModal.querySelector('.popup-overlay');
+  const popupClose = popupModal.querySelector('.popup-close');
+  const popupImage = popupModal.querySelector('.popup-image');
+  const popupTitle = popupModal.querySelector('.popup-title');
+  const popupSubtitle = popupModal.querySelector('.popup-subtitle');
+  const popupDesc = popupModal.querySelector('.popup-desc');
+
+  // 关闭弹窗
+  function closePopup() {
+    popupModal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // 打开弹窗
+  function openPopup(title, subtitle, desc, imageUrl) {
+    popupTitle.textContent = title;
+    popupSubtitle.textContent = subtitle;
+    popupDesc.textContent = desc;
+    popupImage.src = imageUrl;
+    popupModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // 绑定关闭事件
+  popupClose.addEventListener('click', closePopup);
+  popupOverlay.addEventListener('click', closePopup);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && popupModal.classList.contains('active')) {
+      closePopup();
+    }
+  });
+
+  // 卡片数据（根据你的要求：船型桥墩、筏形基础、种蛎固基、浮运架梁）
+  const cardsData = [
+    {
+      title: '船型桥墩',
+      subtitle: '尖顶分水设计 · 有效抗潮汐冲击',
+      desc: '船型桥墩是洛阳桥的核心创新之一。桥墩呈船型，尖顶朝向来水方向，有效分流潮汐冲击，减少水流阻力。这种设计使桥墩能够承受海潮的反复冲击，历经千年依然稳固，是古代海洋工程智慧的结晶。',
+      imgUrl: './images/ship.jpg'
+    },
+    {
+      title: '筏形基础',
+      subtitle: '江底整体石基 · 稳固软土地基',
+      desc: '筏形基础是洛阳桥另一大创新。在江底铺设整层基石，形成稳固的筏式基础，有效解决软土地基承载力问题。这种基础结构使桥梁能够均匀受力，防止不均匀沉降，为现代桥梁建设提供了重要参考。',
+      imgUrl: './images/base.webp'
+    },
+    {
+      title: '种蛎固基',
+      subtitle: '生物胶结技术 · 千年不毁奇迹',
+      desc: '种蛎固基是世界首创的生物工程技术。在桥基周围养殖牡蛎，利用牡蛎分泌的黏液胶结石块，使桥基更加稳固。这项技术被现代工程界称为"生物胶结技术"，是千年不毁的奇迹，展现了古人对自然力的巧妙运用。',
+      imgUrl: './images/little.webp'
+    },
+    {
+      title: '浮运架梁',
+      subtitle: '利用潮汐运石 · 科学施工架设',
+      desc: '浮运架梁是古人利用自然力的智慧结晶。利用潮汐涨落，将重达数十吨的石梁浮运至桥墩上方，待潮水退去后石梁自然落位。这种科学施工方法，展现了古代工匠的卓越智慧，是洛阳桥四大核心工艺之一。',
+      imgUrl: './images/float.webp'
+    }
+  ];
+
+  // 获取四张浮动卡片
+  const floatingCards = document.querySelectorAll('.floating-card');
+  
+  floatingCards.forEach((card, index) => {
+    if (index < cardsData.length) {
+      card.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const data = cardsData[index];
+        openPopup(data.title, data.subtitle, data.desc, data.imgUrl);
+      });
+    }
+  });
+})();
+// ============================================================
+// 鼠标拖尾效果（Mouse Trail）
+// ============================================================
+(function() {
+  // 配置参数
+  const config = {
+    maxTrailLength: 12,
+    lineWidth: 2.5,
+    startColor: [212, 184, 122],  // 金色 #d4b87a
+    endColor: [255, 200, 100],    // 浅金色
+    fadeOutSpeed: 1
+  };
+  
+  // 创建 canvas
+  const canvas = document.createElement('canvas');
+  canvas.id = 'mouseTrailCanvas';
+  document.body.appendChild(canvas);
+  canvas.style.position = 'fixed';
+  canvas.style.top = 0;
+  canvas.style.left = 0;
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '99999';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  const ctx = canvas.getContext('2d');
+  let trail = [];
+  let lastMousePosition = { x: 0, y: 0 };
+  let animationId = null;
+  
+  // 线性插值颜色
+  function lerpColor(a, b, amount) {
+    const [ar, ag, ab] = a;
+    const [br, bg, bb] = b;
+    return [
+      ar + amount * (br - ar),
+      ag + amount * (bg - ag),
+      ab + amount * (bb - ab)
+    ].map(Math.round);
+  }
+  
+  // 绘制拖尾
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let i = 1; i < trail.length; i++) {
+      const gradientRatio = i / trail.length;
+      const color = lerpColor(config.startColor, config.endColor, gradientRatio);
+      
+      ctx.beginPath();
+      ctx.moveTo(trail[i - 1].x, trail[i - 1].y);
+      ctx.lineTo(trail[i].x, trail[i].y);
+      ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      ctx.lineWidth = config.lineWidth;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+  }
+  
+  // 更新轨迹
+  function updateTrail() {
+    if (lastMousePosition.x !== 0 && lastMousePosition.y !== 0) {
+      trail.push({ ...lastMousePosition });
+    }
+    
+    if (trail.length > config.maxTrailLength) {
+      trail = trail.slice(config.fadeOutSpeed);
+    }
+  }
+  
+  // 监听鼠标移动
+  window.addEventListener('mousemove', (event) => {
+    lastMousePosition.x = event.clientX;
+    lastMousePosition.y = event.clientY;
+  });
+  
+  // 动画循环
+  function animate() {
+    updateTrail();
+    draw();
+    animationId = requestAnimationFrame(animate);
+  }
+  animate();
+  
+  // 窗口大小改变时重置 canvas 尺寸
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+})();

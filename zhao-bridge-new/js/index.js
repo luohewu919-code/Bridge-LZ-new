@@ -112,13 +112,21 @@ document.getElementById('btn').onclick = function(e) {
 })();
 
 // ============================================================
-// 4. 宠物飞行 + 粒子系统 + AI对话框
+// 4. 宠物飞行 + 粒子系统 + AI对话框（支持窗口大小改变时自动适配位置）
 // ============================================================
 (function() {
   const pet = document.getElementById('petWrapper');
   const rect = document.getElementById('introRect');
   const aiWindow = document.getElementById('aiChatWindow');
   const petClickArea = document.getElementById('petClickArea');
+  const bulletStats = document.querySelector('.bullet-stats');
+  
+  // 初始隐藏点赞面板
+  if (bulletStats) {
+    bulletStats.style.opacity = '0';
+    bulletStats.style.visibility = 'hidden';
+    bulletStats.style.transition = 'opacity 0.3s ease';
+  }
   
   const canvas = document.getElementById('particleCanvas');
   const ctx = canvas.getContext('2d');
@@ -126,9 +134,58 @@ document.getElementById('btn').onclick = function(e) {
   let animationFrameId = null;
   let isFlying = false;
   
+  // 存储当前宠物位置参数
+  let currentPetW = 40;
+  let currentPetH = 40;
+  let currentEndX = 0;
+  let currentEndY = 10;
+  let currentRightMargin = 30;
+  
+  // 更新宠物下方元素位置的函数
+  function updateElementsBelowPet() {
+    if (!pet) return;
+    const petRect = pet.getBoundingClientRect();
+    const petBottom = petRect.bottom;
+    const petRight = petRect.right;
+    
+    // 更新 AI 对话框位置：紧贴宠物下方，右对齐
+    if (aiWindow) {
+      aiWindow.style.position = 'fixed';
+      aiWindow.style.top = (petBottom + 5) + 'px';
+      aiWindow.style.right = (window.innerWidth - petRight) + 'px';
+      aiWindow.style.left = 'auto';
+      aiWindow.style.bottom = 'auto';
+    }
+    
+    // 更新点赞统计面板位置：紧贴 AI 对话框下方，右对齐
+    if (bulletStats) {
+      let topOffset = petBottom + 5;
+      if (aiWindow && aiWindow.style.display === 'block') {
+        const aiRect = aiWindow.getBoundingClientRect();
+        topOffset = aiRect.bottom + 5;
+      }
+      bulletStats.style.position = 'fixed';
+      bulletStats.style.top = topOffset + 'px';
+      bulletStats.style.right = (window.innerWidth - petRight) + 'px';
+      bulletStats.style.left = 'auto';
+      bulletStats.style.bottom = 'auto';
+    }
+  }
+  
+  // 显示点赞面板（飞行结束后调用）
+  function showBulletStats() {
+    if (bulletStats) {
+      bulletStats.style.opacity = '1';
+      bulletStats.style.visibility = 'visible';
+    }
+  }
+  
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    if (!isFlying && pet && pet.style.visibility === 'visible') {
+      updateElementsBelowPet();
+    }
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
@@ -183,21 +240,37 @@ document.getElementById('btn').onclick = function(e) {
     }
   }
   
+  function updatePetEndPosition() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    currentEndX = w - currentPetW - currentRightMargin;
+    if (currentEndY < 0) currentEndY = 0;
+    return { endX: currentEndX, endY: currentEndY };
+  }
+  
+  window.addEventListener('resize', function() {
+    if (!isFlying && pet && pet.style.visibility === 'visible') {
+      updatePetEndPosition();
+      pet.style.left = currentEndX + 'px';
+      pet.style.top = currentEndY + 'px';
+      updateElementsBelowPet();
+    }
+  });
+  
   const w = window.innerWidth;
   const h = window.innerHeight;
-  const petW = 80;
-  const petH = 80;
-  const margin = 20;
+  const petW = currentPetW;
+  const petH = currentPetH;
   
   const startX = (w - petW) / 2;
   const startY = (h - petH) / 2;
-  const endX = w - petW - margin;
-  const endY = margin;
+  const endX = w - petW - currentRightMargin;
+  const endY = currentEndY;
   
   const cp1x = startX + (endX - startX) * 0.25;
-  const cp1y = Math.max(margin + 30, startY - 100);
+  const cp1y = Math.max(endY + 30, startY - 100);
   const cp2x = endX - 60;
-  const cp2y = Math.max(margin + 20, cp1y - 20);
+  const cp2y = Math.max(endY + 20, cp1y - 20);
   
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.style.position = 'fixed';
@@ -252,6 +325,9 @@ document.getElementById('btn').onclick = function(e) {
         svg.remove();
         isFlying = false;
         addParticles(endX + petW/2, endY + petH/2, 8);
+        // 飞行结束，显示点赞面板并更新位置
+        showBulletStats();
+        updateElementsBelowPet();
       }
     }
     
@@ -270,12 +346,14 @@ document.getElementById('btn').onclick = function(e) {
     petClickArea.addEventListener('mouseenter', function(e) {
       if (hideTimeout) clearTimeout(hideTimeout);
       aiWindow.style.display = 'block';
+      updateElementsBelowPet();
     });
     
     petClickArea.addEventListener('mouseleave', function(e) {
       hideTimeout = setTimeout(function() {
         if (aiWindow && !aiWindow.matches(':hover')) {
           aiWindow.style.display = 'none';
+          updateElementsBelowPet();
         }
       }, 300);
     });
@@ -289,6 +367,7 @@ document.getElementById('btn').onclick = function(e) {
     aiWindow.addEventListener('mouseleave', function() {
       hideTimeout = setTimeout(function() {
         aiWindow.style.display = 'none';
+        updateElementsBelowPet();
       }, 300);
     });
   }
@@ -297,6 +376,7 @@ document.getElementById('btn').onclick = function(e) {
     if (aiWindow && aiWindow.style.display === 'block' && 
         !aiWindow.contains(e.target) && pet && !pet.contains(e.target)) {
       aiWindow.style.display = 'none';
+      updateElementsBelowPet();
     }
   });
   
@@ -305,6 +385,12 @@ document.getElementById('btn').onclick = function(e) {
       e.stopPropagation();
     });
   }
+  
+  window.addEventListener('scroll', function() {
+    if (!isFlying && pet && pet.style.visibility === 'visible') {
+      updateElementsBelowPet();
+    }
+  });
 })();
 
 // ============================================================
@@ -936,100 +1022,103 @@ renderBulletTrack();
 })();
 
 // 方案二：进入区域后延迟展开
-    (function() {
-      const expandBox = document.getElementById('expandBox');
-      const eyesightRight = document.getElementById('eyesightRight');
-      
-      if (!expandBox || !eyesightRight) return;
-      
-      let imageLoaded = false;
-      let expandTimer = null;
-      let hasTriggeredExpand = false;
-      
-      const img = new Image();
-      img.onload = function() {
-        imageLoaded = true;
-      };
-      img.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Zhaozhou_Bridge/800px-Zhaozhou_Bridge.jpg';
-      
-      function checkAndToggle() {
-        const rect = eyesightRight.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        const isInViewport = rect.top < windowHeight - 100 && rect.bottom > 100;
-        
-        if (isInViewport && !hasTriggeredExpand) {
-          expandTimer = setTimeout(() => {
-            expandBox.classList.add('expanded');
-            if (imageLoaded) {
-              expandBox.style.backgroundImage = `url('${img.src}')`;
-            } else {
-              expandBox.style.backgroundImage = "url('https://picsum.photos/id/104/500/400')";
-            }
-            hasTriggeredExpand = true;
-          }, 100);
-        } else if (!isInViewport && hasTriggeredExpand) {
-          if (expandTimer) {
-            clearTimeout(expandTimer);
-            expandTimer = null;
-          }
-          expandBox.classList.remove('expanded');
-          expandBox.style.backgroundImage = '';
-          hasTriggeredExpand = false;
-        } else if (!isInViewport && expandTimer) {
-          clearTimeout(expandTimer);
-          expandTimer = null;
+(function() {
+  const expandBox = document.getElementById('expandBox');
+  const eyesightRight = document.getElementById('eyesightRight');
+  
+  if (!expandBox || !eyesightRight) return;
+  
+  let imageLoaded = false;
+  let expandTimer = null;
+  let hasTriggeredExpand = false;
+  
+  const img = new Image();
+  img.onload = function() {
+    imageLoaded = true;
+  };
+  img.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Zhaozhou_Bridge/800px-Zhaozhou_Bridge.jpg';
+  
+  function checkAndToggle() {
+    const rect = eyesightRight.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const isInViewport = rect.top < windowHeight - 100 && rect.bottom > 100;
+    
+    if (isInViewport && !hasTriggeredExpand) {
+      expandTimer = setTimeout(() => {
+        expandBox.classList.add('expanded');
+        if (imageLoaded) {
+          expandBox.style.backgroundImage = `url('${img.src}')`;
+        } else {
+          expandBox.style.backgroundImage = "url('https://picsum.photos/id/104/500/400')";
         }
+        hasTriggeredExpand = true;
+      }, 100);
+    } else if (!isInViewport && hasTriggeredExpand) {
+      if (expandTimer) {
+        clearTimeout(expandTimer);
+        expandTimer = null;
       }
-      
-      window.addEventListener('scroll', checkAndToggle);
-      window.addEventListener('resize', checkAndToggle);
-      checkAndToggle();
-    })();
-        (function() {
-      const bottomChart = document.getElementById('bottomChart');
-      if (!bottomChart) return;
-      let hasSlid = false;
-      function checkScroll() {
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        const scrollHeight = document.documentElement.scrollHeight;
-        const clientHeight = window.innerHeight;
-        const isNearBottom = scrollTop + clientHeight >= scrollHeight - 150;
-        if (isNearBottom && !hasSlid) {
-          bottomChart.classList.add('slide-in');
-          hasSlid = true;
-        }
-      }
-      window.addEventListener('scroll', checkScroll);
-      setTimeout(checkScroll, 100);
-    })();
-    (function() {
-      const scrollNav = document.getElementById('scrollNav');
-      const scrollTab = document.getElementById('scrollTab');
-      
-      if (!scrollNav || !scrollTab) return;
-      
-      // 点击卷轴头切换菜单显示/隐藏
-      scrollTab.addEventListener('click', function(e) {
-        e.stopPropagation();
-        scrollNav.classList.toggle('open');
-      });
-      
-      // 点击页面其他地方关闭菜单
-      document.addEventListener('click', function(e) {
-        if (!scrollNav.contains(e.target)) {
-          scrollNav.classList.remove('open');
-        }
-      });
-      
-      // 点击菜单项后关闭菜单
-      const menuItems = document.querySelectorAll('.scroll-item');
-      menuItems.forEach(item => {
-        item.addEventListener('click', function() {
-          scrollNav.classList.remove('open');
-        });
-      });
-    })();
-    // ============================================================
+      expandBox.classList.remove('expanded');
+      expandBox.style.backgroundImage = '';
+      hasTriggeredExpand = false;
+    } else if (!isInViewport && expandTimer) {
+      clearTimeout(expandTimer);
+      expandTimer = null;
+    }
+  }
+  
+  window.addEventListener('scroll', checkAndToggle);
+  window.addEventListener('resize', checkAndToggle);
+  checkAndToggle();
+})();
+
+(function() {
+  const bottomChart = document.getElementById('bottomChart');
+  if (!bottomChart) return;
+  let hasSlid = false;
+  function checkScroll() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = window.innerHeight;
+    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 150;
+    if (isNearBottom && !hasSlid) {
+      bottomChart.classList.add('slide-in');
+      hasSlid = true;
+    }
+  }
+  window.addEventListener('scroll', checkScroll);
+  setTimeout(checkScroll, 100);
+})();
+
+(function() {
+  const scrollNav = document.getElementById('scrollNav');
+  const scrollTab = document.getElementById('scrollTab');
+  
+  if (!scrollNav || !scrollTab) return;
+  
+  // 点击卷轴头切换菜单显示/隐藏
+  scrollTab.addEventListener('click', function(e) {
+    e.stopPropagation();
+    scrollNav.classList.toggle('open');
+  });
+  
+  // 点击页面其他地方关闭菜单
+  document.addEventListener('click', function(e) {
+    if (!scrollNav.contains(e.target)) {
+      scrollNav.classList.remove('open');
+    }
+  });
+  
+  // 点击菜单项后关闭菜单
+  const menuItems = document.querySelectorAll('.scroll-item');
+  menuItems.forEach(item => {
+    item.addEventListener('click', function() {
+      scrollNav.classList.remove('open');
+    });
+  });
+})();
+
+// ============================================================
 // 增强版弹窗函数 - 支持所有卡片类型 + 完整图文内容
 // ============================================================
 
@@ -1315,3 +1404,417 @@ document.querySelectorAll('.timeline-card').forEach(card => {
     window.addEventListener('scroll', checkAndToggle);
     setTimeout(checkAndToggle, 100);
 })();
+// ============================================================
+// 结构剖面图弹窗 - 仅针对 .structure-visual
+// ============================================================
+(function() {
+  // 创建弹窗元素（如果不存在）
+  let popupModal = document.getElementById('structurePopup');
+  if (!popupModal) {
+    popupModal = document.createElement('div');
+    popupModal.id = 'structurePopup';
+    popupModal.className = 'structure-popup';
+    popupModal.innerHTML = `
+      <div class="popup-overlay"></div>
+      <div class="popup-container">
+        <button class="popup-close">×</button>
+        <div class="popup-content">
+          <img class="popup-image" src="" alt="结构图">
+          <h3 class="popup-title"></h3>
+          <p class="popup-desc"></p>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(popupModal);
+  }
+
+  const popupOverlay = popupModal.querySelector('.popup-overlay');
+  const popupClose = popupModal.querySelector('.popup-close');
+  const popupImage = popupModal.querySelector('.popup-image');
+  const popupTitle = popupModal.querySelector('.popup-title');
+  const popupDesc = popupModal.querySelector('.popup-desc');
+
+  function closePopup() {
+    popupModal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function openPopup(title, desc, imageUrl) {
+    popupTitle.textContent = title;
+    popupDesc.textContent = desc;
+    popupImage.src = imageUrl;
+    popupModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  popupClose.addEventListener('click', closePopup);
+  popupOverlay.addEventListener('click', closePopup);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && popupModal.classList.contains('active')) {
+      closePopup();
+    }
+  });
+
+  // 只绑定 .structure-visual 元素
+  const structureVisual = document.querySelector('.structure-visual');
+  if (structureVisual) {
+    structureVisual.addEventListener('click', function() {
+      openPopup(
+        '赵州桥敞肩拱结构剖面图',
+        '赵州桥历经隋、唐、宋、元、明、清至今，功能不断演变。最初为南北交通要道与战略通道，后逐渐成为商贸枢纽与城市文化标志。近现代转为公路辅桥及建筑研究，至当代转型为文旅展示与文化遗产核心载体，承载千年历史价值。',
+        './images/zhao-bridge-white.png'
+      );
+    });
+  }
+})();
+// ============================================================
+// 鼠标经过 content-section 区域时改变鼠标样式
+// ============================================================
+(function() {
+  // 获取所有需要改变鼠标样式的元素
+  const targetSections = document.querySelectorAll('.content-section.animate-on-scroll.visible');
+  
+  // 如果初始没有 .visible，使用 MutationObserver 监听类名变化
+  function applyCursorStyle(element) {
+    element.style.cursor = 'pointer';  // 小手样式，可改成其他
+    // 其他可选样式：'help', 'move', 'crosshair', 'grab', 'zoom-in' 等
+  }
+  
+  function removeCursorStyle(element) {
+    element.style.cursor = '';
+  }
+  
+  // 处理已有元素
+  targetSections.forEach(section => {
+    applyCursorStyle(section);
+  });
+  
+  // 监听动态添加 .visible 类的情况
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const target = mutation.target;
+        if (target.classList && target.classList.contains('visible')) {
+          if (target.classList.contains('content-section') && target.classList.contains('animate-on-scroll')) {
+            applyCursorStyle(target);
+          }
+        }
+      }
+    });
+  });
+  
+  // 观察所有 .content-section.animate-on-scroll 元素
+  const allSections = document.querySelectorAll('.content-section.animate-on-scroll');
+  allSections.forEach(section => {
+    observer.observe(section, { attributes: true });
+  });
+  
+  // 同时也给父容器 .deconstruction-wrapper 内的所有可点击元素添加样式
+  const deconstructionWrapper = document.querySelector('.deconstruction-wrapper');
+  if (deconstructionWrapper) {
+    deconstructionWrapper.style.cursor = 'default';
+    
+    // 给内部所有可交互元素添加小手样式
+    const interactiveElements = deconstructionWrapper.querySelectorAll('.structure-visual, .structure-item, .bar-item, .process-step, .value-card');
+    interactiveElements.forEach(el => {
+      el.style.cursor = 'pointer';
+    });
+  }
+})();
+
+// ============================================================
+// 鼠标拖尾效果（只对特定区域生效）
+// ============================================================
+(function() {
+  // 配置参数
+  const config = {
+    maxTrailLength: 8,
+    lineWidth: 2.5,
+    startColor: [212, 184, 122],  // #d4b87a 金色
+    endColor: [255, 200, 100],    // 浅金色
+    fadeOutSpeed: 1
+  };
+  
+  // 是否在目标区域内
+  let isInTargetArea = false;
+  
+  // 创建 canvas
+  const canvas = document.createElement('canvas');
+  canvas.id = 'mouseTrailCanvas';
+  document.body.appendChild(canvas);
+  canvas.style.position = 'fixed';
+  canvas.style.top = 0;
+  canvas.style.left = 0;
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '99999';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  const ctx = canvas.getContext('2d');
+  let trail = [];
+  let lastMousePosition = { x: 0, y: 0 };
+  let animationId = null;
+  
+  // 判断鼠标是否在目标区域内
+  function isMouseInTargetArea(x, y) {
+    const targetArea = document.querySelector('.deconstruction-wrapper');
+    if (!targetArea) return false;
+    
+    // 获取元素边界
+    const rect = targetArea.getBoundingClientRect();
+    // 考虑滚动偏移
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const mouseX = x + scrollX;
+    const mouseY = y + scrollY;
+    
+    return mouseX >= rect.left && mouseX <= rect.right && 
+           mouseY >= rect.top && mouseY <= rect.bottom;
+  }
+  
+  function lerpColor(a, b, amount) {
+    const [ar, ag, ab] = a;
+    const [br, bg, bb] = b;
+    return [
+      ar + amount * (br - ar),
+      ag + amount * (bg - ag),
+      ab + amount * (bb - ab)
+    ].map(Math.round);
+  }
+  
+  function draw() {
+    if (!isInTargetArea) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let i = 1; i < trail.length; i++) {
+      const gradientRatio = i / trail.length;
+      const color = lerpColor(config.startColor, config.endColor, gradientRatio);
+      
+      ctx.beginPath();
+      ctx.moveTo(trail[i - 1].x, trail[i - 1].y);
+      ctx.lineTo(trail[i].x, trail[i].y);
+      ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      ctx.lineWidth = config.lineWidth;
+      ctx.stroke();
+    }
+  }
+  
+  function updateTrail() {
+    if (!isInTargetArea) {
+      if (trail.length > 0) {
+        trail = [];
+      }
+      return;
+    }
+    
+    if (lastMousePosition.x !== 0 && lastMousePosition.y !== 0) {
+      trail.push({ ...lastMousePosition });
+    }
+    
+    if (trail.length > config.maxTrailLength) {
+      trail = trail.slice(config.fadeOutSpeed);
+    }
+  }
+  
+  // 鼠标移动
+  window.addEventListener('mousemove', (event) => {
+    lastMousePosition.x = event.clientX;
+    lastMousePosition.y = event.clientY;
+    
+    // 检查是否在目标区域
+    const inArea = isMouseInTargetArea(event.clientX, event.clientY);
+    if (inArea !== isInTargetArea) {
+      isInTargetArea = inArea;
+      if (!isInTargetArea) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        trail = [];
+      }
+    }
+  });
+  
+  function animate() {
+    updateTrail();
+    draw();
+    animationId = requestAnimationFrame(animate);
+  }
+  animate();
+  
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+})()// ============================================================
+// 鼠标拖尾效果 - 仅对特定区域生效
+// ============================================================
+(function() {
+  // 配置参数
+  const config = {
+    maxTrailLength: 12,
+    lineWidth: 2.5,
+    startColor: [212, 184, 122],  // 金色 #d4b87a
+    endColor: [255, 200, 100],    // 浅金色
+    fadeOutSpeed: 1
+  };
+  
+  // 创建 canvas
+  const canvas = document.createElement('canvas');
+  canvas.id = 'mouseTrailCanvas';
+  document.body.appendChild(canvas);
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '99999';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  const ctx = canvas.getContext('2d');
+  let trail = [];
+  let lastMousePosition = { x: 0, y: 0 };
+  let animationId = null;
+  let isInTargetArea = false;
+  
+  // 获取目标区域（所有 .content-section.animate-on-scroll.visible 及其延时版本）
+  function getTargetAreas() {
+    const selectors = [
+      '.content-section.animate-on-scroll.visible',
+      '.content-section.animate-on-scroll.delay-1.visible',
+      '.content-section.animate-on-scroll.delay-2.visible',
+      '.content-section.animate-on-scroll.delay-3.visible'
+    ];
+    return document.querySelectorAll(selectors.join(','));
+  }
+  
+  // 判断鼠标是否在目标区域内
+  function isMouseInTargetArea(x, y) {
+    const targetAreas = getTargetAreas();
+    for (const area of targetAreas) {
+      const rect = area.getBoundingClientRect();
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  // 线性插值颜色
+  function lerpColor(a, b, amount) {
+    const [ar, ag, ab] = a;
+    const [br, bg, bb] = b;
+    return [
+      ar + amount * (br - ar),
+      ag + amount * (bg - ag),
+      ab + amount * (bb - ab)
+    ].map(Math.round);
+  }
+  
+  // 绘制拖尾
+  function draw() {
+    if (!isInTargetArea) {
+      // 不在区域内时清空画布
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let i = 1; i < trail.length; i++) {
+      const gradientRatio = i / trail.length;
+      const color = lerpColor(config.startColor, config.endColor, gradientRatio);
+      
+      ctx.beginPath();
+      ctx.moveTo(trail[i - 1].x, trail[i - 1].y);
+      ctx.lineTo(trail[i].x, trail[i].y);
+      ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      ctx.lineWidth = config.lineWidth;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+  }
+  
+  // 更新轨迹
+  function updateTrail() {
+    if (!isInTargetArea) {
+      // 不在区域内时清空轨迹
+      if (trail.length > 0) {
+        trail = [];
+      }
+      return;
+    }
+    
+    if (lastMousePosition.x !== 0 && lastMousePosition.y !== 0) {
+      trail.push({ ...lastMousePosition });
+    }
+    
+    if (trail.length > config.maxTrailLength) {
+      trail = trail.slice(config.fadeOutSpeed);
+    }
+  }
+  
+  // 监听鼠标移动
+  window.addEventListener('mousemove', (event) => {
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+    
+    const inArea = isMouseInTargetArea(mouseX, mouseY);
+    
+    // 状态变化时清空轨迹
+    if (inArea !== isInTargetArea) {
+      isInTargetArea = inArea;
+      trail = [];
+      if (!isInTargetArea) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    
+    lastMousePosition.x = mouseX;
+    lastMousePosition.y = mouseY;
+  });
+  
+  // 监听 DOM 变化（当元素动态添加 .visible 类时重新检测）
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        // 重新计算当前鼠标位置是否在区域内
+        if (lastMousePosition.x !== 0 || lastMousePosition.y !== 0) {
+          const inArea = isMouseInTargetArea(lastMousePosition.x, lastMousePosition.y);
+          if (inArea !== isInTargetArea) {
+            isInTargetArea = inArea;
+            trail = [];
+            if (!isInTargetArea) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+          }
+        }
+      }
+    });
+  });
+  
+  // 观察目标元素
+  const targetElements = document.querySelectorAll('.content-section.animate-on-scroll');
+  targetElements.forEach(el => {
+    observer.observe(el, { attributes: true });
+  });
+  
+  // 动画循环
+  function animate() {
+    updateTrail();
+    draw();
+    animationId = requestAnimationFrame(animate);
+  }
+  animate();
+  
+  // 窗口大小改变时重置 canvas 尺寸
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+})();;
